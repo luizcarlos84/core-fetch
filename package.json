@@ -1,0 +1,18 @@
+{
+  "name": "core-fetch",
+  "version": "1.0.0",
+  "description": "Analisador de informações de carteiras",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Luiz Carlos Nunes",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^6.0.0",
+    "express": "^4.16.3",
+    "fetch": "^1.1.0",
+    "mongodb": "^3.1.4",
+    "node-fetch": "^2.2.0"
+  }
+}
