@@ -1,51 +1,70 @@
-/* Colletion */
+  /* Colletion */
+
+  /*  Config*/
+  {
+    "Blocks" : [{
+      "Block":"int",
+      "timeStamp": "date or var"
+      }]
+  }
 
 
-/* user */
+ /* user */
 {
   "_ID":"string",
+  "ver" : 1,
   "user":"string",
   "passwd":"hash",
   "wallet":["string"],
-  "rate_avg":0,
+  "rate_avg": 0,
   "rate":[
     {
       "_ID":"string",
       "_IDuser":"string",
-      "star":0,
+      "star": 0,
       "comment":"string"
     }
   ]
 }
 
-/* comment */
+ /* comment */
 {
   "_ID":"string",
   "_IDuser":"string",
-  "star":0,
+  "star": 0,
   "comment":"string"
 }
 
-/* wallet */
-/* O hash160 pode substituir o _ID? */
-/* SIM!!! */
+ /* wallet */
 
 {
-  "_ID":"string",
-  "ver" : "de acordo com o modelo adotado",
-  "hash160":"string",
+  "_ID":"hash160 : string",
+  "ver" : 1,
   "address":"string",
   "owner" : "string",
-  "orphan" : "boolean",
+  "orphan" : false,
   "miner" : "boolean",
   "pool" : "boolean",
-  "n_tx":0 "Soma direta",
+  "n_tx": 0,
   "txs":[
     {
-      "timeStamp": "date ou var",
+      "timeStamp": "date or var",
       "hash":"string",
       "input":[{"wallet": "string", "value" : "string"}],
       "out": [{"wallet": "string", "value" : "string"}]
     }
   ]
+}
+
+ /* wallet orphan*/
+
+{
+  "_ID":"hash160 : string",
+  "ver" : 1,
+  "address":"string",
+  "owner" : "string",
+  "orphan" : true,
+  "miner" : "boolean",
+  "pool" : "boolean",
+  "n_tx":0 "Soma direta",
 }

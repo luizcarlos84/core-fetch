@@ -45,7 +45,9 @@ explore = () => {
   try {
     // // Busca a hash e o height dos blocos
     rest.req(coin.btc.getblocks())
-    .then( res => {
+    .then( res =>{
+      // // Realizar busca no banco comparando com existente
+    }).then( res => {
       console.log('Extrato de Informações');
 
       // // Busca e retorna o hash do bloco
