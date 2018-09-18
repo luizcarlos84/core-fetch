@@ -15,8 +15,8 @@ const btc = {
   var_balance    : 'balance?active=', //Retorno JSON com o saldo da carteira
   var_latestblock: 'latestblock',     //Retorna ultimo bloco
   var_query      : 'q/',              //Parametros de consultas
-  var_blocks     : 'blocks' ,          //Parametros de retorno dos blocos
-  var_json       : '?format=json',     //Solicitação em formato JSON
+  var_blocks     : 'blocks' ,         //Parametros de retorno dos blocos
+  var_json       : '?format=json',    //Solicitação em formato JSON
 
   // Retorna o host dentro das funções
   host: function(cmd){

@@ -18,30 +18,6 @@ const btc_conf = {
   col   :  process.env.BTC_COLL_WALLET //A collection que deseja manupular
 }
 
-// module.exports = {
-//   search : function funk1(callback) {
-//     MongoClient.connect("mongodb://localhost:27017/test", function (err,db) {
-//       if (err) {
-//         return console.dir(err);
-//       }
-//       db.db(conf.db).collection(conf.col).find().toArray(function (err, items) {
-//         console.log(items);
-//         return callback(items);
-//       });
-//     });wallet-test
-//   }
-// };
-
-// search = () => {
-//   return MongoClient.connect(conf.host).then(function(client) {
-//     return client.db(conf.db).collection(conf.col).find().toArray()
-//   }).then(function(items) {
-//     console.log(items);
-//     // return items;
-//   });
-// }
-
-
 // ---------------- Uso Interno - Promise ----------------
 
 
@@ -59,7 +35,6 @@ const connect = () => {
 
 // ---------------- Uso Interno - Funções ----------------
 
-//
 
 // Fechar a conexão
 close = (db) => {
@@ -74,11 +49,14 @@ close = (db) => {
 findToArray = (client) => {
   return client.db(btc_conf.db).collection(btc_conf.col).find().toArray();
 }
+
+
 // Insere um objeto por vez
 // O metodo padrão é {"chave" : "Valor"}
 insertOne = (client, res) => {
   return client.db(btc_conf.db).collection(btc_conf.col).insertOne(res);
 }
+
 
 // Insere uma array de Objetos
 // O padrão é [{"Chave" : "Valor"}, {"Chave" : "Valor"}]
@@ -90,6 +68,7 @@ insertMany = (client, res) => {
 // ---------------- Exportações - Funções ----------------
 
 // Deve realizar uma busca no banco e devolver os valores
+
 search = (db) => {
   return db.then( client => {
     return findToArray(client);
@@ -98,9 +77,10 @@ search = (db) => {
   }).then(() => {
     close(db);
   }).catch(err => {
-    console.warn('Erro no Search: ', err);
+    console.warn('Erro no search:\n', err);
   });
 }
+
 
 // Insert - Inserir novos valores no Banco
 
@@ -119,9 +99,21 @@ insert = (db, res) => {
   }).then(() => {
     close(db);
   }).catch(err => {
-    console.warn(err);
+    console.warn('Erro no Insert:\n',err);
   });
 }
+
+
+// Retona os valores existentes no banco
+
+existentes(){}
+
+
+// Retona os valores inexistentes no banco
+
+candidatos(){}
+
+// ---------------- Exportações ----------------
 
 // Valores
 module.exports.conf = conf;

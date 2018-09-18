@@ -1,70 +1,91 @@
-  /* Colletion */
+  /* -------------------Colletion------------------- */
 
   /*  Config*/
   {
     "Blocks" : [{
-      "Block":"int",
+      "Block"    : "int",
       "timeStamp": "date or var"
-      }]
+      }],
+    "DB"     : {
+      "Base"     : [],
+      "Coll"     : []
+    }
   }
 
 
  /* user */
+
 {
-  "_ID":"string",
-  "ver" : 1,
-  "user":"string",
-  "passwd":"hash",
-  "wallet":["string"],
-  "rate_avg": 0,
-  "rate":[
-    {
-      "_ID":"string",
-      "_IDuser":"string",
-      "star": 0,
-      "comment":"string"
-    }
-  ]
+  "_ID"      : "string",
+  "ver"      : 1,
+  "user"     : "string",
+  "passwd"   : "hash",
+  "wallet"   : ["string"],
+  "rate_avg" : "var",
+  "rate"     : [{
+      "_ID"       : "string",
+      "_IDfrom"   : "string",
+      "_IDto"     : "string",
+      "timeStamp" : "date or var",
+      "star"      : "var",
+      "comment"   : "string"
+    }]
 }
 
+
  /* comment */
+ /* _IDfrom    : Origem  */
+ /* _IDto      : Destinatário */
+ /* timeStamp  : Horario */
+ /* comment    : Comentário */
+ /* star       : Avaliação entre 1 a 5 */
+
 {
-  "_ID":"string",
-  "_IDuser":"string",
-  "star": 0,
-  "comment":"string"
+  "_ID"       : "string",
+  "_IDfrom"   : "string",
+  "_IDto"     : "string",
+  "timeStamp" : "date or var",
+  "star"      : "var",
+  "comment"   : "string"
 }
 
  /* wallet */
+ /* _ID     : Será utilizado o hash160 como ID único */
+ /* owner   : identificador do dono no sistema */
+ /* orphan  : Carteira sem dono identificado */
+ /* miner   : Carteira de um possível mineiro */
+ /* pool    : Carteira de um sistema de mineração em cooperação */
 
 {
-  "_ID":"hash160 : string",
-  "ver" : 1,
-  "address":"string",
-  "owner" : "string",
-  "orphan" : false,
-  "miner" : "boolean",
-  "pool" : "boolean",
-  "n_tx": 0,
-  "txs":[
-    {
-      "timeStamp": "date or var",
-      "hash":"string",
-      "input":[{"wallet": "string", "value" : "string"}],
-      "out": [{"wallet": "string", "value" : "string"}]
-    }
-  ]
+  "_ID"     : "hash160 : string",
+  "ver"     : 1,
+  "address" : "string",
+  "owner"   : "string",
+  "orphan"  : "boolean",
+  "miner"   : "boolean",
+  "pool"    : "boolean",
+  "n_tx"    : "var",
+  "txs"     : [{
+      "timeStamp" : "date or var",
+      "hash"      : "string",
+      "input"     : [{"wallet": "string", "value" : "string"}],
+      "out"       : [{"wallet": "string", "value" : "string"}]
+    }]
 }
 
- /* wallet orphan*/
+/* -------------------Modelo de manupulação de dados------------------- */
+
+/* variavel : Responsável por armazenar as informações ao ser instanciada */
+/*  */
+/* fetch    : Resposta externas */
+/* base     : Informações armazenadas */
+/* result   : Termino de uma manipulação entre a base e o fetch */
 
 {
-  "_ID":"hash160 : string",
-  "ver" : 1,
-  "address":"string",
-  "owner" : "string",
-  "orphan" : true,
-  "miner" : "boolean",
-  "pool" : "boolean",
-  "n_tx":0 "Soma direta",
+  "variavel" : {
+    "conf"   : [],
+    "fetch"  : [],
+    "base"   : [],
+    "result" : []
+  }
 }
