@@ -13,7 +13,7 @@
   }
 
 
- /* user */
+ /* users */
 
 {
   "_ID"      : "string",
@@ -66,7 +66,7 @@
   "pool"    : "boolean",
   "n_tx"    : "var",
   "txs"     : [{
-      "timeStamp" : "date or var",
+      "time"      : "date or var",
       "hash"      : "string",
       "input"     : [{"wallet": "string", "value" : "string"}],
       "out"       : [{"wallet": "string", "value" : "string"}]
@@ -75,17 +75,17 @@
 
 /* -------------------Modelo de manupulação de dados------------------- */
 
-/* variavel : Responsável por armazenar as informações ao ser instanciada */
-/*  */
-/* fetch    : Resposta externas */
-/* base     : Informações armazenadas */
-/* result   : Termino de uma manipulação entre a base e o fetch */
+/* conf     : variáveis de configuração */
+/* data     : Objeto com os dados para manipulação */
+/* fetch    : Retorno de Solicitações externas */
+/* db       : Retorno de Informações armazenadas no banco*/
+/* result   : Resultado de manipulação entre fetch e o db */
 
 {
-  "variavel" : {
-    "conf"   : [],
+  "conf"  : [],
+  "data"  : {
     "fetch"  : [],
-    "base"   : [],
+    "db"     : [],
     "result" : []
   }
 }

@@ -1,14 +1,33 @@
-// ---------------- Required ----------------
+/* ---------------- Required ---------------- */
 
-// Required - exports by npm
+// // Required ES6 Native
+const util = require('util');
+
+// // Required - exports by npm
+const assert = require('assert');
 const dotenv = require('dotenv').load();
-var MongoClient = require('mongodb').MongoClient;
-// Required - customs exports
-const c = require('./conf/conf');
-const r = require('./model/rest');
-const t = require('./model/timeStamp');
+const express = require('express');
+const MongoClient = require('mongodb').MongoClient;
+const route = express();
+
+// // Required - customs exports
+const conf = require('./conf/conf');
+const coin = require('./model/coin');
 const db = require('./repo/db');
+const rest = require('./model/rest');
 
-const conf = c.db.host();
+/* ---------------- Variables ---------------- */
 
-console.warn(conf);
+var model = conf.model();
+var test = {a:1};
+
+model.data.result.push(test);
+
+/* ---------------- Area de Testes ----------------
+Fique a vontade para testar qualquer parametros após
+esse comentário.
+Evite usar o index.js deixando vestígios de código.
+*/
+console.warn(model);
+console.warn(util.isArray(model.data.result));
+console.warn(util.isArray(test));

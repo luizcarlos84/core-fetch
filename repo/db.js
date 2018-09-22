@@ -1,30 +1,28 @@
-var MongoClient = require('mongodb').MongoClient;
+/* ---------------- Required ---------------- */
+
+// // Required ES6 Native
+const util = require('util');
+
+// // Required - exports by npm
 const assert = require('assert');
 const dotenv = require('dotenv').load();
+const express = require('express');
+const MongoClient = require('mongodb').MongoClient;
+const route = express();
 
-// ---------------- Variaveis ----------------
-// Dados de configuração do Banco
-// Os valores do dotenv não são enviados com module.exports (veriicar)
+// // Required - customs exports
+const conf = require('../conf/conf');
+const coin = require('../model/coin');
+const rest = require('../model/rest');
 
-const conf = {
-  host  :  process.env.HOST, //endereço do banco:porta/database
-  db    :  process.env.DB, //nome da database
-  col   :  process.env.COLLECTION //A collection que deseja manupular
-}
 
-const btc_conf = {
-  host  :  process.env.BTC_HOST,  //endereço do banco:porta/database
-  db    :  process.env.BTC_DB, //nome da database
-  col   :  process.env.BTC_COLL_WALLET //A collection que deseja manupular
-}
-
-// ---------------- Uso Interno - Promise ----------------
+/* ---------------- Uso Interno - Promise ---------------- */
 
 
 // Promise inicia a conexão
 const connect = () => {
   return new Promise( (resolve, reject) => {
-    MongoClient.connect(btc_conf.host, { useNewUrlParser: true }, (err, client) => {
+    MongoClient.connect( conf.db.hostwallet() , { useNewUrlParser: true }, (err, client) => {
       assert.equal(null, err);
       console.log('Conexão aberta');
       resolve(client);
@@ -33,92 +31,96 @@ const connect = () => {
 }
 
 
-// ---------------- Uso Interno - Funções ----------------
+/* ---------------- Uso Interno - Funções ---------------- */
 
 
 // Fechar a conexão
-close = (db) => {
-  return db.then( client => {
+close = (client) => {
+  return client.then( res => {
     console.log('Conexão fechada');
-    client.close();
+    res.close();
   })
 }
 
 
 // Retorno de array de busca
-findToArray = (client) => {
-  return client.db(btc_conf.db).collection(btc_conf.col).find().toArray();
+findToArray = (client, db, coll) => {
+  return client.db(db).collection(coll).find().toArray();
 }
 
 
 // Insere um objeto por vez
 // O metodo padrão é {"chave" : "Valor"}
-insertOne = (client, res) => {
-  return client.db(btc_conf.db).collection(btc_conf.col).insertOne(res);
+insertOne = (client, db, coll, object) => {
+  return client.db(db).collection(coll).insertOne(object);
 }
 
 
 // Insere uma array de Objetos
 // O padrão é [{"Chave" : "Valor"}, {"Chave" : "Valor"}]
-insertMany = (client, res) => {
-  return client.db(btc_conf.db).collection(btc_conf.col).insertMany(res);
+insertMany = (client, db, coll, array) => {
+  return client.db(db).collection(coll).insertMany(array);
 }
 
 
-// ---------------- Exportações - Funções ----------------
+/* ---------------- Exportações - Funções ---------------- */
 
 // Deve realizar uma busca no banco e devolver os valores
 
-search = (db) => {
-  return db.then( client => {
-    return findToArray(client);
-  }).then(itens => {
-    console.log(itens);
+searchWallet = (client) => {
+  return client.then( res => {
+
+    let d = conf.db;
+    let base = d.base[0]
+    let coll = d.coll[0]
+
+    return findToArray(res, base, coll);
+
   }).then(() => {
-    close(db);
+    close(client);
+
   }).catch(err => {
-    console.warn('Erro no search:\n', err);
+    console.warn('Erro no searchWallet:\n', err);
+
   });
 }
 
 
-// Insert - Inserir novos valores no Banco
+insertWallet = (client, model) => {
+  return client.then( res => {
 
-insert = (db, res) => {
-  let founds;
-  return db.then( client => {
+    let d = conf.db;
+    let base = d.base[0]
+    let coll = d.coll[0]
 
-    // Existe a função inserMany que poderia inserir toda
-    // A Array, mas antes é necessário criar um filtro Parametros
-    // Verificar se a carteira existe
-    for(count in res.in){
-      console.log(res.in[count]);
-      insertOne(client, res.in[count]);
+    if( util.isArray(model.data.result) ){
+      let array = model.data.result;
+
+      insertMany(res, base, coll, array);
+
+    }
+    else{
+      console.warn('model.data.result não é uma array');
     }
 
   }).then(() => {
-    close(db);
-  }).catch(err => {
-    console.warn('Erro no Insert:\n',err);
+    close(client);
+
+  }).catch( err => {
+    console.warn('Erro no insertWallet\n', err);
+
   });
+
 }
-
-
-// Retona os valores existentes no banco
-
-existentes(){}
 
 
 // Retona os valores inexistentes no banco
 
-candidatos(){}
+excludente = () => {}
 
-// ---------------- Exportações ----------------
+/* ---------------- Exportações ---------------- */
 
-// Valores
-module.exports.conf = conf;
-module.exports.btc_conf = btc_conf;
 // Função
 module.exports.connect = connect;
-module.exports.search = search;
-module.exports.insert = insert;
+module.exports.insertWallet = insertWallet;
+module.exports.searchWallet = searchWallet;

@@ -1,32 +1,165 @@
-// // ---------------- Required ----------------
+/* ---------------- Required ---------------- */
+
+// // Required ES6 Native
+const util = require('util');
+
 // // Required - exports by npm
+const assert = require('assert');
 const dotenv = require('dotenv').load();
 const express = require('express');
-var route = express();
-var MongoClient = require('mongodb').MongoClient;
+const MongoClient = require('mongodb').MongoClient;
+const route = express();
+
 // // Required - customs exports
 const conf = require('./conf/conf');
 const coin = require('./model/coin');
-const rest = require('./model/rest');
-const time = require('./model/timeStamp');
 const db = require('./repo/db');
+const rest = require('./model/rest');
 
-// // ---------------- Variables ----------------
-// // Variables
+/* ---------------- Variables ---------------- */
+
 var wallet = process.env.WALLET;
 var hash = process.env.HASH
+var model = conf.model();
 
-// // Objetos na busca
-obj = { "_ID" : "5b777111ebcd8f1a5929b451" };
-// // Variavel de busca
-busca = 'Nexus One'
-// // Parametros de indexaçãoptimize
-// // Quais campos variaveis deverão ser indexadas
-index = { tx_pos: 1 , product: 1 };
+/* ---------------- Funções ---------------- */
 
-// // ---------------- Funções ----------------
 
-explore = () => {
+/* Prepara os dados obtidos para o modelo de dados do Banco
+   Retorna o valor para dentro do objeto model conforme esquema
+
+model = {
+     "conf"  : [],
+     "data"  : {
+       "fetch"  : [ consulta ],
+       "db"     : [],
+       "result" : [ saída ]
+     }
+};
+*/
+walletPattern = (model) => {
+
+  try {
+
+    for(p_fetch in model.data.fetch){
+      // Resume o valor adiquirido
+      let r_fetch = model.data.fetch[p_fetch];
+
+      // Instancia o objeto wallet
+      let wallet = conf.wallet(r_fetch.hash160,r_fetch.address,r_fetch.n_tx)
+
+      for(p_txs in r_fetch.txs){
+        // Resume o valor adiquirido
+        let r_txs = r_fetch.txs[p_txs];
+
+        // Instancia o objeto de transações
+        let txs = conf.txs(r_txs.time,r_txs.hash);
+
+
+        for(p_inputs in r_txs.inputs){
+          // Resume o valor adiquirido
+          let r_inputs = r_txs.inputs[p_inputs].prev_out;
+
+          // Instancia o objeto para enviar a wallet.txs.inputs
+          let tx = conf.tx(r_inputs.addr,r_inputs.value,r_inputs.spent);
+
+          // Insere como objeto na array wallet.txs.inputs
+          txs.inputs.push(tx);
+        }
+
+
+        for(p_out in r_txs.out){
+          // Resume o valor adiquirido
+          let r_out = r_txs.out[p_out];
+
+          // Instancia o objeto para enviar a wallet.txs.out
+          let tx = conf.tx(r_out.addr,r_out.value,r_out.spent);
+
+          // Insere como objeto na array wallet.txs.out
+          txs.out.push(tx);
+
+        }
+
+        // Insere na array wallet.txs
+        wallet.txs.push(txs);
+      }
+
+      // Inserir na array model.data.result
+      model.data.result.push(wallet);
+    }
+
+    // Retornar o model
+    return model;
+
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+
+/* Buscam por novas transações e invoca a insertWallet()
+
+  Realiza busca no banco e analisa as carteiras
+  Consulta as transações das carteiras que possuem proprietarios
+  Verifica se a carteira existe no Banco
+  se não existir invoca o insertWallet() e prossegue */
+
+walletExplorer = (model) => {
+
+    try {
+
+      /* A carteira 8e8b63152f5a6748f3cde372d0d150ad4d4fc3df
+         é apenas para teste */
+      rest.req(coin.btc.rawaddr('8e8b63152f5a6748f3cde372d0d150ad4d4fc3df'))
+      .then( res => {
+
+        model.data.fetch.push(res);
+        walletPattern(model);
+
+      }).then( res => {
+
+        // Abre a conexão com o banco
+        let client = db.connect();
+
+        // Executa a função de inserção
+        db.insertWallet(client, model);
+
+        // console.warn(JSON.stringify(model.data.result, null , "\t"));
+
+      }).then( res => {
+
+/*PAREI AQUI - Tentando pergar as variaveis do banco */
+
+        // Abre a conexão com o banco
+        let client = db.connect();
+
+        // Executa a busca no banco
+        let x = db.searchWallet(client);
+
+        // Tentando armazenar
+        return x;
+
+      }).then(res =>{
+        // Tentando exibir
+        console.warn(res);
+
+      }).catch(err =>{
+        console.warn(err);
+      })
+
+    } catch (err) {
+      console.warn(err);
+    }
+
+
+}
+
+
+
+
+// Busca por novas transações para atualização das carteiras
+
+blocksExplorer = () => {
 
   // // Valor teste de um bloco
   let height = 538962;
@@ -45,9 +178,7 @@ explore = () => {
   try {
     // // Busca a hash e o height dos blocos
     rest.req(coin.btc.getblocks())
-    .then( res =>{
-      // // Realizar busca no banco comparando com existente
-    }).then( res => {
+    .then( res => {
       console.log('Extrato de Informações');
 
       // // Busca e retorna o hash do bloco
@@ -151,5 +282,6 @@ explore = () => {
 
 }
 
-// // ---------------- Inicializando funções ----------------
-explore();
+/* ---------------- Inicializando funções ---------------- */
+// blocksExplorer();
+walletExplorer(model);
