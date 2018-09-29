@@ -44,8 +44,8 @@ close = (client) => {
 
 
 // Retorno de array de busca
-findToArray = (client, db, coll) => {
-  return client.db(db).collection(coll).find().toArray();
+findToArray = async (client, db, coll) => {
+  return await client.db(db).collection(coll).find().toArray();
 }
 
 
@@ -68,19 +68,23 @@ insertMany = (client, db, coll, array) => {
 // Deve realizar uma busca no banco e devolver os valores
 
 searchWallet = (client) => {
-  return client.then( res => {
+  return client.then( async (res) => {
 
     let d = conf.db;
     let base = d.base[0]
     let coll = d.coll[0]
 
-    return findToArray(res, base, coll);
+    return await findToArray(res, base, coll);
+
+  }).then( res=>{
+    console.log(res[0]);
+    return res[0];
 
   }).then(() => {
     close(client);
 
   }).catch(err => {
-    console.warn('Erro no searchWallet:\n', err);
+    console.warn('Erro na função db.searchWallet:\n', err);
 
   });
 }

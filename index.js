@@ -46,7 +46,7 @@ walletPattern = (model) => {
       let r_fetch = model.data.fetch[p_fetch];
 
       // Instancia o objeto wallet
-      let wallet = conf.wallet(r_fetch.hash160,r_fetch.address,r_fetch.n_tx)
+      let wallet = conf.wallet(r_fetch.address, r_fetch.hash160,r_fetch.n_tx)
 
       for(p_txs in r_fetch.txs){
         // Resume o valor adiquirido
@@ -92,7 +92,7 @@ walletPattern = (model) => {
     return model;
 
   } catch (err) {
-    console.log(err);
+    console.log('Erro na função walletPattern\n',err);
   }
 }
 
@@ -108,9 +108,13 @@ walletExplorer = (model) => {
 
     try {
 
-      /* A carteira 8e8b63152f5a6748f3cde372d0d150ad4d4fc3df
-         é apenas para teste */
-      rest.req(coin.btc.rawaddr('8e8b63152f5a6748f3cde372d0d150ad4d4fc3df'))
+      /* A carteira 1Dzhw2EwFPBpWVuKZqkya5deUqyUUrpsTj
+         é apenas para teste. Nessa área deve ocorrer a Busca
+         por carteiras em uma Colletion especifica antes de se
+         realizar uma inserção*/
+
+
+      rest.req(coin.btc.rawaddr('1Dzhw2EwFPBpWVuKZqkya5deUqyUUrpsTj'))
       .then( res => {
 
         model.data.fetch.push(res);
@@ -126,34 +130,32 @@ walletExplorer = (model) => {
 
         // console.warn(JSON.stringify(model.data.result, null , "\t"));
 
-      }).then( res => {
-
-/*PAREI AQUI - Tentando pergar as variaveis do banco */
+      }).then( async () => {
 
         // Abre a conexão com o banco
         let client = db.connect();
 
-        // Executa a busca no banco
-        let x = db.searchWallet(client);
 
-        // Tentando armazenar
-        return x;
+// PAREI AQUI. AINDA NÂO CONSIGO RETORNAR O VALOR
+
+        // Executa a busca no banco
+        return await db.searchWallet(client);
 
       }).then(res =>{
-        // Tentando exibir
-        console.warn(res);
+
+        // exibindo o resultado
+        console.log('retorno: ', res);
 
       }).catch(err =>{
-        console.warn(err);
+        console.warn('Erro na promessa rest.req em index.walletExplorer\n', err);
       })
 
     } catch (err) {
-      console.warn(err);
+      console.warn('Erro na função index.walletExplorer\n', err);
     }
 
 
 }
-
 
 
 
@@ -200,7 +202,7 @@ blocksExplorer = () => {
       // // 2 - comparar se há alguma carteira cadastrada
       // // 3 - realizar a atualização da carteira
 
-      // // Solicita o hash do bloco baseado no seu height
+      // // Solicita o hash do bloco baseado no s        console.log(x);eu height
       rest.req(coin.btc.rawblock(hash))
       .then( res => {
 
@@ -263,12 +265,12 @@ blocksExplorer = () => {
       });
 
     }).catch( err => {
-      console.warn('Erro: ', err);
+      console.warn('Erro na promisse rest.req em index.blocksExplorer\n', err);
     });
 
 
   } catch (err) {
-    console.log('Erro na função explore() /n', err);
+    console.log('Erro na função index.blocksExplorer\n', err);
   }
   // // Passo 2 consultar carteiras bloco para então criar ou atualizar
 

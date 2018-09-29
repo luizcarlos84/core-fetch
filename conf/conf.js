@@ -8,7 +8,7 @@ const db = {
   // Variaveis
   host   : 'mongodb://localhost:27017/',
   base   : ['wallet','users'],
-  coll   : ['wallet','users','comment'],
+  coll   : ['wallet', 'pending', 'info', 'confirmed', 'pool', 'users','comment'],
   adm    : ['config'],
 
   /* gets*/
@@ -45,24 +45,25 @@ const model = () => {
 
 /* -------------------Modelo de dados para wallets-------------------
 
-_ID     : Será utilizado o hash160 como ID único
+_ID     : Será utilizado o address como ID único
 owner   : identificador do dono no sistema
 orphan  : Carteira sem dono identificado
 miner   : Carteira de um possível mineiro
 pool    : Carteira de um sistema de mineração em cooperação */
 
 
-const wallet = (id,address,n_tx) => {
+const wallet = (address, hash160, n_tx) => {
   return {
-   "_id"     : id,
-   "ver"     : 1,
-   "address" : address,
-   "owner"   : "",
-   "orphan"  : true,
-   "miner"   : false,
-   "pool"    : false,
-   "n_tx"    : n_tx,
-   "txs"     : []
+   "_id"      : address,
+   "hash160"  : hash160,
+   "ver"      : 1,
+   "owner"    : "",
+   "confirmed": false,
+   "orphan"   : true,
+   "miner"    : false,
+   "pool"     : false,
+   "n_tx"     : n_tx,
+   "txs"      : []
  }
 };
 
@@ -82,7 +83,11 @@ const txs = (time,hash) => {
 
 /* tx deve ser inserido na array wallet.txs.inputs ou wallet.txs.out */
 const tx = (addr, value, spent) =>{
-  return {"addr": addr, "value" : value, "spent" : spent};
+  return {
+    "addr"  : addr,
+    "value" : value,
+    "spent" : spent
+  }
 };
 
 
