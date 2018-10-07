@@ -1,6 +1,7 @@
   /* -------------------Base - config------------------- */
 
   /* collection - config */
+
   {
     "blocks" : [{
       "block"    : "int",
@@ -34,13 +35,13 @@
 }
 
 
- /* collection - comment */
+ /*  collection - comment */
 
- /* _idFrom    : Origem do comentário */
- /* _idTo      : Destinatário do comentário */
- /* timeStamp  : Horario realizado */
- /* star       : Avaliação entre 1 a 5 */
- /* comment    : Comentário em texto */
+ /*  _idFrom    : Origem do comentário                             */
+ /*  _idTo      : Destinatário do comentário                       */
+ /*  timeStamp  : Horario realizado                                */
+ /*  star       : Avaliação entre 1 a 5                            */
+ /*  comment    : Comentário em texto                              */
 
 {
   "_id"       : "ObjectId",
@@ -54,20 +55,18 @@
 /* -------------------Base - wallets------------------- */
 
 
- /* collection - wallet */
+/*  collection - wallet */
 
- /* _id      : Utilizando o address como ID único */
- /* owner    : Identificador de um usuário que informa ser proprietario */
- /* confirmed: Confirmação do sistema da posse da carteira */
- /* orphan   : Carteira sem dono identificado */
- /* miner    : Carteira de um possível mineiro */
- /* pool     : Carteira de um sistema de mineração em cooperação */
+/*  _id      : Utilizando o address como ID único                     */
+/*  confirmed: Confirmação do sistema da posse da carteira            */
+/*  orphan   : Carteira sem dono identificado                         */
+/*  miner    : Carteira de um possível mineiro                        */
+/*  pool     : Carteira de um sistema de mineração em cooperação      */
 
 {
   "_id"      : "address : string",
   "hash160"  : "string",
   "ver"      : 1,
-  "owner"    : "string",
   "confirmed": "boolean",
   "miner"    : "boolean",
   "orphan"   : "boolean",
@@ -82,74 +81,49 @@
 }
 
 
-/* Status */
+/*  owner : Wallet com proprietarios */
 
-/* Será criado cinco collections onde será armazenada as carteiras
-   informada pelo usuário, conforme a regra abaixo:
+/*  _idUser   : ID do usuário que cadastrou                          */
+/*  wallet    : carteira no formato "address"                        */
+/*  script    : transação de confirmação verificada pelo sistema     */
+/*  miner     : carteira que recebeu transferência cota de mineração */
 
-   pending   : Carteira informada pelo usuario e pronto para análise
-        _idUser   : ID do usuário que cadastrou
-        wallet    : carteira no formato hash160
 
-   claimed   : Carteira gerada e analisada. É um ponto de busca padrão
-        _idUser   : ID do usuário que cadastrou
-        wallet    : carteira no formato hash160
-        miner     : carteira que recebeu transferência cota de mineração
-
-   confirmed : Usuário confirma a posse e o sistema validou. ponto de busca.
-       _idUser   : ID do usuário que cadastrou
-       wallet    : carteira no formato hash160
-       miner     : carteira que recebeu transferência cota de mineração
-       script    : transação de confirmação verificada pelo sistema
-
-   pool      : Carteira utilizada por sistemas de mineração
-       _idUser   : ID do sistema de mineração
-       wallet    : carteira no formato hash160 */
-
-/* collection - pending */
+/* collection - owner */
 
 {
-  "_idUser": "ObjectId",
-  "wallet" : "string"
+  "_idUser"   : "ObjectId",
+  "address"   : [{
+    "addr"      : "string",
+    "confirmed" : "boolean",
+    "hash"      : "string"
+    }]
 }
 
-/* collection - claimed */
+/*  pending: wallets recem informada pelo usuário e ainda não processada*/
 
-{
-  "_idUser": "ObjectId",
-  "wallet" : "string",
-  "miner"  : "boolean"
-}
+/*  collection com carteiras recem informadas pelo usuários             */
+/*  Após isso a carteira é transferida para a collection owner          */
+/*  pelo walletExplorer()                                               */
 
-/* collection - confirmed */
+/* collection - pending*/
 
-{
-  "_idUser": "ObjectId",
-  "wallet" : "string",
-  "miner"  : "boolean",
-  "script" : "string"
-}
-
-/* collection - pool */
-
-{
-  "_idUser": "ObjectId",
-  "wallet" : "string"
-}
+   {
+     "_idUser"   : "ObjectId",
+     "wallet"    : "string",
+   }
 
 /* -------------------Modelo de manupulação de dados------------------- */
 
-/* conf     : variáveis de configuração */
-/* data     : Objeto com os dados para manipulação */
-/* fetch    : Retorno de Solicitações externas */
-/* db       : Retorno de Informações armazenadas no banco*/
-/* result   : Resultado de manipulação entre fetch e o db */
+/*  conf     : variáveis de configuração                                 */
+/*  data     : Objeto com os dados para manipulação                      */
+/*  fetch    : Retorno de Solicitações externas                          */
+/*  db       : Retorno de Informações armazenadas no banco               */
+/*  result   : Resultado de manipulação entre fetch e o db               */
 
 {
-  "conf"  : [],
-  "data"  : {
-    "fetch"  : [],
-    "db"     : [],
-    "result" : []
-  }
+  "conf"   : [],
+  "fetch"  : [],
+  "db"     : [],
+  "result" : []
 }

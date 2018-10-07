@@ -1,8 +1,5 @@
 /* ---------------- Required ---------------- */
 
-// // Required ES6 Native
-const util = require('util');
-
 // // Required - exports by npm
 const assert = require('assert');
 const dotenv = require('dotenv').load();
@@ -30,71 +27,189 @@ var model = conf.model();
 
 model = {
      "conf"  : [],
-     "data"  : {
-       "fetch"  : [ consulta ],
-       "db"     : [],
-       "result" : [ saída ]
-     }
+     "fetch"  : [ consulta ],
+     "db"     : [],
+     "result" : [ saída ]
 };
 */
-walletPattern = (model) => {
+walletPattern = (array) => {
 
   try {
 
-    for(p_fetch in model.data.fetch){
-      // Resume o valor adiquirido
-      let r_fetch = model.data.fetch[p_fetch];
+    if(Array.isArray(array)){
 
-      // Instancia o objeto wallet
-      let wallet = conf.wallet(r_fetch.address, r_fetch.hash160,r_fetch.n_tx)
+      // Retorna o valor da função
+      let result = [];
 
-      for(p_txs in r_fetch.txs){
+      for(p_fetch in array){
         // Resume o valor adiquirido
-        let r_txs = r_fetch.txs[p_txs];
+        let r_fetch = array[p_fetch];
 
-        // Instancia o objeto de transações
-        let txs = conf.txs(r_txs.time,r_txs.hash);
+        // Instancia o objeto wallet
+        let wallet = conf.wallet(r_fetch.address, r_fetch.hash160,r_fetch.n_tx)
 
-
-        for(p_inputs in r_txs.inputs){
+        for(p_txs in r_fetch.txs){
           // Resume o valor adiquirido
-          let r_inputs = r_txs.inputs[p_inputs].prev_out;
+          let r_txs = r_fetch.txs[p_txs];
 
-          // Instancia o objeto para enviar a wallet.txs.inputs
-          let tx = conf.tx(r_inputs.addr,r_inputs.value,r_inputs.spent);
+          // Instancia o objeto de transações
+          let txs = conf.txs(r_txs.time,r_txs.hash);
 
-          // Insere como objeto na array wallet.txs.inputs
-          txs.inputs.push(tx);
+
+          for(p_inputs in r_txs.inputs){
+            // Resume o valor adiquirido
+            let r_inputs = r_txs.inputs[p_inputs].prev_out;
+
+            // Instancia o objeto para enviar a wallet.txs.inputs
+            let tx = conf.tx(r_inputs.addr,r_inputs.value,r_inputs.spent);
+
+            // Insere como objeto na array wallet.txs.inputs
+            txs.inputs.push(tx);
+          }
+
+
+          for(p_out in r_txs.out){
+            // Resume o valor adiquirido
+            let r_out = r_txs.out[p_out];
+
+            // Instancia o objeto para enviar a wallet.txs.out
+            let tx = conf.tx(r_out.addr,r_out.value,r_out.spent);
+
+            // Insere como objeto na array wallet.txs.out
+            txs.out.push(tx);
+
+          }
+
+          // Insere na array wallet.txs
+          wallet.txs.push(txs);
         }
 
-
-        for(p_out in r_txs.out){
-          // Resume o valor adiquirido
-          let r_out = r_txs.out[p_out];
-
-          // Instancia o objeto para enviar a wallet.txs.out
-          let tx = conf.tx(r_out.addr,r_out.value,r_out.spent);
-
-          // Insere como objeto na array wallet.txs.out
-          txs.out.push(tx);
-
-        }
-
-        // Insere na array wallet.txs
-        wallet.txs.push(txs);
+        // Inserir na array result
+        result.push(wallet);
       }
 
-      // Inserir na array model.data.result
-      model.data.result.push(wallet);
+      // Retornar o result
+      return result;
+
+
+    }
+    else{
+      console.log('Valor inválido em walletPattern');
+      return 0;
+
     }
 
-    // Retornar o model
-    return model;
-
   } catch (err) {
-    console.log('Erro na função walletPattern\n',err);
+    console.log('Erro na função walletPattern\n', err);
   }
 }
+//
+// walletPattern = (array) => {
+//
+//   try {
+//
+//     if(Array.isArray(array)){
+//
+//       let result = [];
+//
+//       array.forEach( z => {
+//
+//         // Instancia o objeto wallet
+//         let wallet = conf.wallet(fetch.address, fetch.hash160, fetch.n_tx),
+//
+//         z.txs.forEach( txs => {
+//
+//           // Instancia o objeto de transações
+//           let txsValue = conf.txs( txs.time, txs.hash);
+//
+//           txs.inputs.forEach( tx => {
+//
+//             // Instancia o objeto para enviar a wallet.txs.inputs
+//             let txValue = conf.tx( tx.prev_out.addr, tx.prev_out.value, tx.prev_out.spent );
+//
+//             // Insere como objeto na array wallet.txs.inputs
+//             txsValue.inputs.push(txValue);
+//           });
+//
+//           txs.out.forEach( tx => {
+//
+//             // Instancia o objeto para enviar a wallet.txs.out
+//             let txValue = conf.tx(tx.addr, tx.value, tx.spent);
+//
+//             // Insere como objeto na array wallet.txs.out
+//             txsValue.out.push(txValue);
+//           });
+//           // Insere na array wallet.txs
+//           wallet.txs.push(txsValue);
+//         });
+//         // Inserir na array result
+//         result.push(wallet);
+//       });
+//
+//       return result;
+//     }
+//     else{
+//       console.log('Valor inválido em walletPattern');
+//       return 0;
+//     }
+//
+//   } catch (err) {
+//     console.log('Erro na função walletPattern\n', err);
+//   }
+// }
+//
+// /* Padroniza os dados do usuário */
+//
+// userPattern = (array) => {        console.log(model);
+//
+//   try{
+//
+//     // troque true por Array.isArray(array)
+//     if(true){
+//
+//       // Codigo para teste
+//       // Insere dados apenas para teste
+//       let test = conf.data();
+//
+//       // Insere os dados de teste no objeto model
+//       test.forEach( x => {
+//         model.fetch.push(x);
+//       });
+//       // Fim Codigo para teste
+//
+//       // Inicio do código permanente
+//
+//       let result = [];
+//
+//       array.forEach( res => {
+//
+//         // Solicita o método e insere os dados
+//         let user = conf.user(res.user, res.passwd);
+//
+//         // Insere o valor no result
+//         result.push(user);
+//
+//       })
+//
+//       // Testando os valores recebidos
+//       console.log(array);
+//       console.log(result);
+//
+//       // Retorno do objeto
+//       // return model;
+//     }
+//     else{
+//       console.log('Valor inválido em userPattern');
+//       return 0;
+//     }
+//
+//
+//
+//   } catch ( err ) {
+//     console.log('erro em index.userPattern\n', err);
+//   }
+//
+// }
 
 
 /* Buscam por novas transações e invoca a insertWallet()
@@ -108,52 +223,58 @@ walletExplorer = (model) => {
 
     try {
 
-      /* A carteira 1Dzhw2EwFPBpWVuKZqkya5deUqyUUrpsTj
+      /* A carteira 1Dzhw2EwFPBpWVuKZqkya5deUqyUUrpsTj e a
+         1KDEVePj4eL91ETBKs2HS74AoxABsPWHqe
          é apenas para teste. Nessa área deve ocorrer a Busca
          por carteiras em uma Colletion especifica antes de se
          realizar uma inserção*/
 
-
-      rest.req(coin.btc.rawaddr('1Dzhw2EwFPBpWVuKZqkya5deUqyUUrpsTj'))
+      rest.req(coin.btc.rawaddr('3K9jB6tewg88TXpxKpiuGh8sorX3bHm1ar'))
       .then( res => {
 
-        model.data.fetch.push(res);
-        walletPattern(model);
+        // Insere o valor na array de resultado
+        model.fetch.push(res);
+
+        // Padroniza os dados na array result
+        model.res = walletPattern(model.fetch);
 
       }).then( res => {
 
-        // Abre a conexão com o banco
-        let client = db.connect();
+        //Limpa o vetor
+        model.fetch.splice(0);
+
+        // Transfere do vetor de resultado para o de pesquisa
+        model.res.forEach( obj => {
+          model.fetch.push(obj);
+        });
+
+        // limpa o vetor de resultado
+        model.res.splice(0);
 
         // Executa a função de inserção
-        db.insertWallet(client, model);
+        model.fetch.forEach( obj => {
+            // console.log(obj);
+            db.insertWallet(obj);
+        });
 
-        // console.warn(JSON.stringify(model.data.result, null , "\t"));
 
       }).then( async () => {
 
-        // Abre a conexão com o banco
-        let client = db.connect();
+        // Aguarda e retorna a busca no banco
+          return await db.findWallet(model.fetch._id);
 
+      }).then( res =>{
 
-// PAREI AQUI. AINDA NÂO CONSIGO RETORNAR O VALOR
-
-        // Executa a busca no banco
-        return await db.searchWallet(client);
-
-      }).then(res =>{
-
-        // exibindo o resultado
+        // exibindo o resultado para testes
         console.log('retorno: ', res);
 
       }).catch(err =>{
-        console.warn('Erro na promessa rest.req em index.walletExplorer\n', err);
+        console.warn('Erro no promise rest.req em index.walletExplorer\n', err);
       })
 
     } catch (err) {
       console.warn('Erro na função index.walletExplorer\n', err);
     }
-
 
 }
 
@@ -285,5 +406,5 @@ blocksExplorer = () => {
 }
 
 /* ---------------- Inicializando funções ---------------- */
-// blocksExplorer();
 walletExplorer(model);
+// userPattern(model);

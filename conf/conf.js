@@ -8,7 +8,7 @@ const db = {
   // Variaveis
   host   : 'mongodb://localhost:27017/',
   base   : ['wallet','users'],
-  coll   : ['wallet', 'pending', 'info', 'confirmed', 'pool', 'users','comment'],
+  coll   : ['wallet', 'users','owner', 'pending'],
   adm    : ['config'],
 
   /* gets*/
@@ -34,12 +34,10 @@ result   : Resultado de manipulação entre fetch e o db */
 
 const model = () => {
   return {
-       "conf"  : [],
-       "data"  : {
-         "fetch"  : [],
-         "db"     : [],
-         "result" : []
-       }
+       "conf"   : [],
+       "fetch"  : [],
+       "db"     : [],
+       "res"    : [],
      };
 };
 
@@ -91,6 +89,33 @@ const tx = (addr, value, spent) =>{
 };
 
 
+/* -------------------Modelo de dados para usuários-------------------
+
+ ver       : 1,
+ user      : "string",
+ passwd    : "hash",
+ wallet    : ["string"],
+ rate_avg  : "var",
+ rate      :
+ */
+
+ const user = (user, passwd) => {
+   return {
+     "ver"      : 1,
+     "user"     : user,
+     "passwd"   : passwd,
+     "wallet"   : [],
+     "rate_avg" : '',
+     "rate"     : []
+   }
+ };
+
+// Dados para teste
+const data = () => {
+  return [{user: 'luiz', passwd: 'abc123'},
+    {user: 'Natália', passwd: 'abcd12'}]
+}
+
 
 /* -------------------Exportações------------------- */
 module.exports.db = db;
@@ -98,3 +123,6 @@ module.exports.model = model;
 module.exports.wallet = wallet;
 module.exports.txs = txs;
 module.exports.tx = tx;
+module.exports.user = user;
+// Data exporta os dados de teste
+module.exports.data = data;

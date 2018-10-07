@@ -9,14 +9,15 @@ const btc = {
 
   // Variaveis das funções
   var_hostname   : 'https://blockchain.info/',
-  var_rawtx      : 'rawtx/',          //Retorna JSON de uma transação simples
-  var_rawblock   : 'rawblock/',       //Retorna JSON das transações em um bloco
-  var_rawaddr    : 'rawaddr/',        //Retorna JSON das transações de uma carteira
-  var_balance    : 'balance?active=', //Retorno JSON com o saldo da carteira
-  var_latestblock: 'latestblock',     //Retorna ultimo bloco
-  var_query      : 'q/',              //Parametros de consultas
-  var_blocks     : 'blocks' ,         //Parametros de retorno dos blocos
-  var_json       : '?format=json',    //Solicitação em formato JSON
+  var_rawtx      : 'rawtx/',                  //Retorna JSON de uma transação simples
+  var_rawblock   : 'rawblock/',               //Retorna JSON das transações em um bloco
+  var_rawaddr    : 'rawaddr/',                //Retorna JSON das transações de uma carteira
+  var_multiaddr  : 'multiaddr?active=',       //Retornar JSON com multiplas transações
+  var_balance    : 'balance?active=',         //Retorno JSON com o saldo da carteira
+  var_latestblock: 'latestblock',             //Retorna ultimo bloco
+  var_query      : 'q/',                      //Parametros de consultas
+  var_blocks     : 'blocks' ,                 //Parametros de retorno dos blocos
+  var_json       : '?format=json',            //Solicitação em formato JSON
 
   // Retorna o host dentro das funções
   host: function(cmd){
@@ -26,6 +27,20 @@ const btc = {
   // Retorna JSON de uma transação simples
   rawtx      : function(var_hash){
     return this.host(this.var_rawtx) + var_hash;
+  },
+
+  multiaddr  : function(array_hash){
+    let address = '';
+    let count = 0;
+
+      array_hash.forEach(value =>{
+        if(count != 0)
+          address =+ '|';
+        address =+ value;
+        count++;
+      })
+
+    return this.host(this.var_multiaddr) + address;
   },
 
   // Retorna JSON das transações em um bloco
@@ -43,11 +58,6 @@ const btc = {
     return this.host(this.var_balance) + var_wallet;
   },
 
-  // Retorna o ultimo bloco sendo processado
-  latestblock: function(){
-    return this.host(this.var_latestblock);
-  },
-
   // ---------------- Real-Time ----------------
 
   // Retorno da lista de Blocos disponiveis e os seus hash
@@ -61,16 +71,24 @@ const btc = {
   getdifficulty: function(){
     return this.host(this.var_query) + 'getdifficulty';
   },
+
   // Current block height in the longest chain
   // Retorna o valor do ultimo bloco
   getblockcount: function(){
     return this.host(this.var_query) + 'getblockcount';
   },
+
   // Hash of the latest block
   // Hash do ultimo bloco
   latesthash: function() {
     return this.host(this.var_query) + 'latesthash';
   },
+
+  // Retorna o ultimo bloco sendo processado
+  latestblock: function(){
+    return this.host(this.var_latestblock);
+  },
+
   // Current block reward in BTC
   // Valor da recompensa do bloco em BTC
   bcperblock: function(){
