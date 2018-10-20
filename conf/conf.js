@@ -8,7 +8,7 @@ const db = {
   // Variaveis
   host   : 'mongodb://localhost:27017/',
   base   : ['wallet','users'],
-  coll   : ['wallet', 'users','owner', 'pending'],
+  coll   : ['wallet', 'users','pending', 'owner'],
   adm    : ['config'],
 
   /* gets*/
@@ -80,11 +80,18 @@ const txs = (time,hash) => {
 };
 
 /* tx deve ser inserido na array wallet.txs.inputs ou wallet.txs.out */
-const tx = (addr, value, spent) =>{
+const tx = (addr, value, spent) => {
   return {
     "addr"  : addr,
     "value" : value,
     "spent" : spent
+  }
+};
+
+const walletPending = (idUser, wallet) => {
+  return {
+    "_idUser"   : idUser,
+    "wallet"    : wallet,
   }
 };
 
@@ -99,22 +106,54 @@ const tx = (addr, value, spent) =>{
  rate      :
  */
 
- const user = (user, passwd) => {
+ const user = (username, email, passwd) => {
    return {
      "ver"      : 1,
-     "user"     : user,
+     "username" : username,
+     "email"    : email,
      "passwd"   : passwd,
-     "wallet"   : [],
-     "rate_avg" : '',
+     "wallets"  : [],
+     "rate_avg" : -1,
      "rate"     : []
    }
  };
 
-// Dados para teste
-const data = () => {
-  return [{user: 'luiz', passwd: 'abc123'},
-    {user: 'Natália', passwd: 'abcd12'}]
-}
+ /* -------------------projection------------------- */
+
+const walletUserProj = () => {
+  return { projection: {
+   '_id'      : 1,
+   'hash160'  : 1,
+   'ver'      : 0,
+   'owner'    : 0,
+   'confirmed': 1,
+   'orphan'   : 0,
+   'miner'    : 0,
+   'pool'     : 0,
+   'n_tx'     : 1,
+   'txs'      : 0
+    }
+  }
+};
+
+const walletOwnerProj = () => {
+  return { projection: {
+   '_id'      : 1,
+   'hash160'  : 1,
+   'ver'      : 0,
+   'owner'    : 0,
+   'confirmed': 1,
+   'orphan'   : 1,
+   'miner'    : 0,
+   'pool'     : 0,
+   'n_tx'     : 1,
+   'txs'      : 1
+    }
+  }
+};
+
+
+
 
 
 /* -------------------Exportações------------------- */
@@ -124,5 +163,4 @@ module.exports.wallet = wallet;
 module.exports.txs = txs;
 module.exports.tx = tx;
 module.exports.user = user;
-// Data exporta os dados de teste
-module.exports.data = data;
+module.exports.walletPending = walletPending;

@@ -25,51 +25,49 @@ const btc = {
   },
 
   // Retorna JSON de uma transação simples
-  rawtx      : function(var_hash){
-    return this.host(this.var_rawtx) + var_hash;
+  rawtx      : async function(var_hash){
+    return rest.req(this.host(this.var_rawtx) + var_hash);
   },
 
-  multiaddr  : function(array_hash){
+  multiaddr  : async function(array_hash){
     let address = '';
-    let count = 0;
 
-      array_hash.forEach(value =>{
-        if(count != 0)
+      array_hash.forEach( async (element, index) => {
+        if(element != 0)
           address =+ '|';
-        address =+ value;
-        count++;
+        address =+ element;
       })
 
-    return this.host(this.var_multiaddr) + address;
+    return await rest.req(this.host(this.var_multiaddr) + address);
   },
 
   // Retorna JSON das transações em um bloco
-  rawblock   : function(var_hash){
-    return this.host(this.var_rawblock) + var_hash;
+  rawblock   : async function(var_hash){
+    return rest.req(this.host(this.var_rawblock) + var_hash);
   },
 
   // Retorna JSON das transações de uma carteira
-  rawaddr    : function(var_wallet){
-    return this.host(this.var_rawaddr) + var_wallet;
+  rawaddr    : async function(var_wallet){
+    return rest.req(this.host(this.var_rawaddr) + var_wallet);
   },
 
   //Retorno JSON com o saldo da carteira
-  balance    : function(var_wallet){
-    return this.host(this.var_balance) + var_wallet;
+  balance    : async function(var_wallet){
+    return rest.req(this.host(this.var_balance) + var_wallet);
   },
 
   // ---------------- Real-Time ----------------
 
   // Retorno da lista de Blocos disponiveis e os seus hash
   // Foi necessário inserir um timeStamp 1535416365158 da data de 28/08/2018
-  getblocks: function() {
-    return this.host(this.var_blocks) + '/1535416365158' + this.var_json
+  getblocks: async function() {
+    return rest.req(this.host(this.var_blocks) + '/1535416365158' + this.var_json);
   },
 
   // Current difficulty target as a decimal number
   // Valor da dificuldade em decimal
-  getdifficulty: function(){
-    return this.host(this.var_query) + 'getdifficulty';
+  getdifficulty: async function(){
+    return await rest.req(this.host(this.var_query) + 'getdifficulty');
   },
 
   // Current block height in the longest chain
@@ -170,6 +168,11 @@ const btc = {
   },
 
   // ---------------- converter and returns ----------------
+
+  // Converter o valor Hash para Address
+  // hashtoaddress: async function(hash) {
+  //   return await rest.req(this.host(this.var_query + 'hashtoaddress/') + hash + '?format=json');
+  // },
 
 };
 

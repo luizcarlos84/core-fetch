@@ -2,6 +2,7 @@
 
 // // Required - exports by npm
 const assert = require('assert');
+const colors = require('colors');
 const dotenv = require('dotenv').load();
 const express = require('express');
 const MongoClient = require('mongodb').MongoClient;
@@ -21,54 +22,197 @@ const connect = () => {
   return new Promise( (resolve, reject) => {
     MongoClient.connect( conf.db.hostwallet() , { useNewUrlParser: true }, (err, client) => {
       assert.equal(null, err);
-      console.log('Conexão aberta');
+      console.log('MongoDB:'.blue,'Conexão aberta'.green);
       resolve(client);
     });
   })
 }
 
+// Delay
+const delay = (ms) => new Promise(
+  (resolve) => setTimeout(resolve, ms)
+);
+
 
 /* ---------------- Uso Interno - Funções CRUD ---------------- */
 
 
-// Fechar a conexão
-close = async (client) => {
-  return await client.then( res => {
-    console.log('Conexão fechada');
-    res.close();
-  })
+// Retorna um objeto de Busca
+findOne = async (db, coll, query, options) => {
+
+  // Variavel de saída
+  let result
+
+  // Abre a conexão como promise e armazena resultado na variavel de saída
+  return await connect().then( async client => {
+
+    console.log('MongoDB:'.blue,'findOne: DB:'.green, db, 'Collection:'.green, coll);
+
+    // É necessário um delay para abertura de conexão com o banco
+    result = await delay(20).then( () => {
+      if(typeof(options) == 'object')
+        return client.db(db).collection(coll).findOne(query, options);
+      else
+        return client.db(db).collection(coll).findOne(query);
+    });
+
+    return client;
+
+  }).then( client => {
+    // Fecha a conexão
+    client.close();
+    console.log('MongoDB:'.blue,'findOne: Conexão fechada'.green);
+
+    // Saída
+    return result;
+
+  }).catch( err => {
+    console.log('MongoDB:'.blue,'Erro em findOne\n'.red ,err);
+  });
+
 }
 
-// Retorna um objeto de Busca - PROBLEMAS
-find = async (client, db, coll, filter) => {
-  return await client.db(db).collection(coll).find(filter);
-}
+
 
 // Retorno de array de busca
-findToArray = async (client, db, coll, filter) => {
-  return await client.db(db).collection(coll).find(filter).toArray();
+findToArray = async (db, coll, query, options) => {
+
+    // Variavel de saída
+    let result
+
+    // Abre a conexão como promise e armazena resultado na variavel de saída
+    return await connect().then( async client => {
+
+      console.log('MongoDB:'.blue,'findToArray: DB:'.green, db, 'Collection:'.green, coll);
+
+      // É necessário um delay para abertura de conexão com o banco
+      result = await delay(20).then( () => {
+        if(typeof(options) == 'object')
+          return client.db(db).collection(coll).find(query, options).toArray();
+        else
+          return client.db(db).collection(coll).findOne(query).toArray();
+      });
+
+      return client;
+
+    }).then( res => {
+      // Fecha a conexão
+      res.close();
+      console.log('MongoDB:'.blue,'findToArray: Conexão fechada'.green);
+
+      // Saída
+      return result;
+
+    }).catch( err => {
+      console.log('MongoDB:'.blue,'Erro em findToArray\n'.red ,err);
+    });
+
 }
 
 
 // Insere um objeto por vez
 // O metodo padrão é {"chave" : "Valor"}
-insertOne = async (client, db, coll, object) => {
-  // let client = connect();
-  return await client.db(db).collection(coll).insertOne(object);
+insertOne = (db, coll, object) => {
+
+  connect().then( client => {
+    console.log('MongoDB:'.blue,'insertOne: Salvando em:'.green, coll);
+    client.db(db).collection(coll).insertOne(object);
+
+    return client ;
+
+  }).then( res => {
+    console.log('MongoDB:'.blue,'insertOne: Conexão fechada'.green);
+    res.close();
+
+  }).catch( err => {
+    console.log('MongoDB:'.blue,'insertOne: Erro em insertOne\n'.red ,err);
+  });
+
 }
 
 
 // Insere uma array de Objetos
 // O padrão é [{"Chave" : "Valor"}, {"Chave" : "Valor"}]
-insertMany = async (client, db, coll, array) => {
-  return await client.db(db).collection(coll).insertMany(array);
+insertMany = (db, coll, array) => {
+
+  connect().then( client => {
+    console.log('MongoDB:'.blue,'insertMany: Salvando em:'.green, coll);
+    client.db(db).collection(coll).insertMany(array);
+
+    return client ;
+
+  }).then( res => {
+    console.log('MongoDB:'.blue,'insertMany: Conexão fechada'.green);
+    res.close();
+
+  }).catch( err => {
+    console.log('MongoDB:'.blue,'insertMany: Erro em insertMany\n'.red ,err);
+  });
+
 }
+
+
+// Update de informações. É necessário Parametros senão todo o banco é atualizado
+updateOne = (client, db, coll, query, options) => {
+  if(options == 'undefined'){
+    console.log('Atualizado em %s comentado(não realizado):'.red, coll);
+    // return client.db(db).collection(coll).updateOne(query)
+  }
+  else{
+    console.log('Atualizado em %s comentado(não realizado):'.green, coll);
+    // return client.db(db).collection(coll).updateOne(query, options)
+  }
+}
+
+
+// Update de informações. Necessário Parametros senão todo o banco é atualizado
+// O padrão é [{"Chave" : "Valor"}, {"Chave" : "Valor"}]
+updateMany = (client, db, coll, query, options) => {
+  if(options == 'undefined'){
+    console.log('Atualizado em %s:'.green, coll);
+    return client.db(db).collection(coll).updateMany(query)
+  }
+  else{
+    console.log('Atualizado em %s:'.green, coll);
+    return client.db(db).collection(coll).updateMany(query, options)
+  }
+
+}
+
+
+// Delete informações. Necessário Parametros
+deleteOne = (client, db, coll, query, options) => {
+  if(options == 'undefined'){
+    console.log('Deletado em %s:'.red, coll);
+    return client.db(db).collection(coll).deleteOne(query)
+  }
+  else{
+    console.log('deletado em %s:'.red, coll);
+    return client.db(db).collection(coll).deleteOne(query, options)
+  }
+}
+
+
+// Delete informações. Necessário Parametros
+// O padrão é [{"Chave" : "Valor"}, {"Chave" : "Valor"}]
+deleteMany = (client, db, coll, query, options) => {
+  if(options == 'undefined'){
+    console.log('Deletado em %s:'.red, coll);
+    return client.db(db).collection(coll).deleteMany(query)
+  }
+  else{
+    console.log('deletado em %s:'.red, coll);
+    return client.db(db).collection(coll).deleteMany(query, options)
+  }
+}
+
+
 
 /* ---------------- Uso Interno - Funções check ---------------- */
 
 
 // Check objetos vazios
-checkObjEmpty = obj => {
+objEmpty = obj => {
   for(key in obj){
     if(obj.hasOwnProperty(key)){
       return false;
@@ -77,75 +221,156 @@ checkObjEmpty = obj => {
   return true;
 }
 
-// Retorna um valor booleano informando se existe(true) ou não(false)
-checkWallet = async (wallet) => {
+// Retorna true se a wallet for desconhecida
+unknownWallet = (wallet) => {
+
+  let result;
 
   if (typeof(wallet) == 'string' && wallet.length == 34 )  {
 
-    // Necessário converter hash160 para address
+    // valores do bando de dados
+    let d = conf.db;
+    let db = d.base[0]
+    let coll = d.coll[0]
 
-    // Abre a conexão
-    let client = connect();
+    // Busca a wallet informada
+    console.log('unknownWallet:'.blue, 'Procurando com findOne:'.green, wallet);
 
-      return await client.then( async res => {
-
-      let d = conf.db;
-      let db = d.base[0]
-      let coll = d.coll[0]
-
-      // Busca a wallet informada
-      return await findToArray(res, db, coll, {_id: wallet});
-
+    // Organizar a projection para o conf.js
+    return new Promise(async res => {
+      let result = await findOne(db, coll, { _id: wallet }, { projection:{ '_id': 1} });
+      res(result);
 
     }).then( async res => {
 
-      // Se a wallet existe e se o objeto não é vazio
-      if(res.length == 1 && !checkObjEmpty(res[0])){
-        //Se o valor da wallet é igual ao do banco retorna true
-        if(wallet == res[0]._id)
-          return true;
-        else
-          return false;
-      }
+      // Se a wallet não estiver cadastrada então ela é desconhecida
+      if(res == null)
+        return true;
       else
         return false;
 
     }).then( res => {
-      close(client);
-      // O retorno precisa estar na ultima ".then"
+      // Saída
       return res;
-
-    }).catch( err => {
-      console.warn('Erro no checkWallet\n', err);
-
     });
 
   }
   else{
-    console.log('Valor inválido em db.checkWallet: ', typeof(wallet), ' ',wallet.length);
+    console.log('unknownWallet:'.blue,'Valor inválido'.red, typeof(wallet));
     return 0;
 
   }
 }
 
-// Verifica novas carteiras e geram novas fichas
-checkWalletPending = async () => {
+
+/* ---------------- Uso Interno - Funções intermediárias ---------------- */
+
+
+// Insere wallets informadas pelo usuários na fila de verificação
+insertPendingWallet = (user_id, wallets) => {
+
+  // Nome do Banco e da Collection
+  let d = conf.db;
+  let db = d.base[0];
+  let coll = d.coll[2];
+
+  new Promise((resolve, reject) => {
+    if(Array.isArray(wallets)){
+
+      // Instanciado antes do forEach
+      let array = [];
+
+      // Varre a array e insere cada elemento
+      wallets.forEach( async element => {
+
+        if(await unknownWallet(element))
+          array.push(element);
+
+        });
+      resolve(array);
+    }
+    else if ( typeof(wallets) == 'string') {
+      if (wallets.length == 34) {
+
+        // Consulta se a array é conhecida
+        let wallet = unknownWallet(wallets);
+
+        // Retorna o resultado booleano
+        resolve(wallet);
+      }
+
+    }
+    else{
+      console.log('insertPendingWallet:'.blue, 'Valor inválido '.yellow, typeof(user_id), typeof(array));
+    }
+
+  }).then( wallet => {
+
+    delay(100).then( () => {
+
+      if(Array.isArray(wallet)){
+
+        // aramazena o objeto do modelo de dados
+        wallet.forEach( (element, index, array) => {
+          array[index] = conf.walletPending(user_id, element);
+
+        });
+
+        wallet.forEach(element =>{
+          console.log('insertPendingWallet:'.blue,'Salvando:'.green, element.wallet);
+
+        })
+
+        // Insere em array
+        insertMany(db, coll, wallet);
+        console.log('insertPendingWallet:'.blue,wallet);
+
+      }
+      else if ( typeof(wallets) == 'string') {
+        if ( typeof(wallet) == 'boolean') {
+
+          let object = conf.walletPending(user_id, wallet);
+
+          if( wallet ){
+            console.log('Inserindo em %s:'.green, coll, wallet);
+            // insertOne(db, coll, object);
+
+          }
+          else
+            console.log('Existente em %s:'.yellow, coll, wallet);
+
+        }
+      }
+    });
+
+  }).catch( err => {
+    console.log(err);
+
+  });
+}
+
+
+//(VAZIO) Verifica novas wallets e geram novas fichas
+checkPendingWallet = () => {
 
 }
 
 
-/* ---------------- Exportações - Funções ---------------- */
+//(VAZIO) Verifica se o usuário confirmou a conta
+checkPendingUser = () => {
 
-// Deve realizar uma busca no banco e devolver os valores
+}
+
+
+/* ---------------- Exportações - Funções primárias ---------------- */
+
+// Realiza busca de wallets e retorna
 findWallet = async (wallet) => {
 
   if (typeof(wallet) === 'string') {
 
-    // abre a conexão
-    let client = connect();
-
     // retorna a busca
-    return await client.then( async (res) => {
+    return await connect().then( async (res) => {
 
       let d = conf.db;
       let db = d.base[0]
@@ -170,44 +395,48 @@ findWallet = async (wallet) => {
   }
 }
 
-// Insere wallet no banco
-insertWallet = async (obj) => {
+// (VAZIO) Realiza busca de usuários e retorna
+findUser = (user) => {
+
+}
+
+// Insere wallet no banco.
+// O objeto precisa estar no padrão do banco
+insertWallet = (obj) => {
+
+  let log_name = 'insertWallet:';
+  let d = conf.db;
+  let db = d.base[0];
+  let coll = d.coll[0];
 
   if(typeof(obj) === 'object'){
 
-    // Abre a conexão
-    let client = connect();
-
-    // Se a wallet existe então true
-    let check = await checkObjEmpty(obj._id);
-
     // Retorna o a inserção
-    return await client.then( async res => {
+    return new Promise((resolve, reject) => {
 
-      let d = conf.db;
-      let db = d.base[0];
-      let coll = d.coll[0];
+      // Se a wallet existe então true
+      let check = objEmpty(obj._id);
+
+      resolve(check);
+
+    }).then( res => {
 
       // Se check for false então insere a wallet
       if(!check){
-        insertOne(res, db, coll, obj);
-        console.log('Wallet inserido');
+        console.log(colors.blue(log_name),'Salvando em %s:'.green, coll, obj._id);
+        // insertOne( db, coll, obj);
+        console.log('res', res);
       }
-      else{
-        console.log('Wallet já existe');
-      }
-
-    }).then( () => {
-      close(client);
+      else
+        console.log(colors.blue(log_name),'Existente em %s:'.red, coll, obj._id,);
 
     }).catch( err => {
-      console.warn('Erro no insertWallet\n', err);
-inserido
+      console.warn(colors.blue(log_name),'Erro:\n'.red, err);
     });
 
   }
   else{
-    console.log('Valor inválido em insertWallet:', typeof(obj));
+    console.log(colors.blue(log_name),'Valor inválido:'.yellow, typeof(obj));
     return 0;
   }
 }
@@ -215,39 +444,72 @@ inserido
 // Insere usuários no banco
 insertUser = async (user) => {
 
-  if (user == undefined || typeof(user) != 'object')  {
+  // Endereço do banco
+  let d = conf.db;
+  let db = d.base[1];
+  let coll = d.coll[1];
+
+  if(typeof(user) == 'object' ){
+    if(typeof(user.username) == 'string'){
+
+      new Promise((resolve, reject) => {
+        console.log('insertUser:'.blue, 'Salvando:'.green, user.username);
+        insertOne(db, coll, user);
+        resolve(0);
+
+      }).then( async () => {
+        let result = await findOne(db, coll, { }, { projection:{ '_id': 1, 'wallets': 1 } })
+        return result;
+
+      }).then( async res => {
+
+        console.log(res);
+        // Insere as wallets informadas pelo usuário na collection  de pendencias
+        await insertPendingWallet(res._id, res.wallets);
+
+      }).catch( err => {
+        console.log(err);
+
+      });
+
+    }
+    else{
+      console.log('insertUser'.blue,'Objeto inválido:'.yellow, user);
+    }
+  }
+  else{
+    console.log('insertUser'.blue,'Valor inválido:'.red, typeof(user));
     // Valores inválidos retornam zero
     return 0;
   }
-  else  {
 
-    // Abre a conexão
-    let client = connect();
-
-    return client.then( async res => {
-
-      let d = conf.db;
-      let base = d.base[1]
-      let coll = d.coll[1]
-
-      return await insertOne(client, base, coll, user);
-
-    }).then( () => {
-      close(client);
-
-    }).catch( err => {
-      console.warn('Erro no insertUser\n', err);
-
-    });
-
-  }
 }
+
+// (VAZIO) Atualiza transações da wallet
+updateWallet = (wallet) =>{
+
+}
+
+// (VAZIO) Atulaliza informações do usuário
+updateUser = (user) =>{
+
+}
+
+
 
 /* ---------------- Exportações ---------------- */
 
 // wallets
-module.exports.insertWallet = insertWallet;
 module.exports.findWallet = findWallet;
-module.exports.checkWallet = checkWallet;
+module.exports.insertWallet = insertWallet;
+// module.exports.updateWallet = updateWallet;
+
 // users
+// module.exports.findUser = findUser;
 module.exports.insertUser = insertUser;
+// module.exports.updateUser = updateUser;
+
+//Temporario
+module.exports.findOne = findOne;
+module.exports.findToArray = findToArray;
+module.exports.unknownWallet = unknownWallet;

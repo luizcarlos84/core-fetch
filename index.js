@@ -2,6 +2,7 @@
 
 // // Required - exports by npm
 const assert = require('assert');
+const colors = require('colors');
 const dotenv = require('dotenv').load();
 const express = require('express');
 const MongoClient = require('mongodb').MongoClient;
@@ -15,8 +16,6 @@ const rest = require('./model/rest');
 
 /* ---------------- Variables ---------------- */
 
-var wallet = process.env.WALLET;
-var hash = process.env.HASH
 var model = conf.model();
 
 /* ---------------- Funções ---------------- */
@@ -103,113 +102,6 @@ walletPattern = (array) => {
     console.log('Erro na função walletPattern\n', err);
   }
 }
-//
-// walletPattern = (array) => {
-//
-//   try {
-//
-//     if(Array.isArray(array)){
-//
-//       let result = [];
-//
-//       array.forEach( z => {
-//
-//         // Instancia o objeto wallet
-//         let wallet = conf.wallet(fetch.address, fetch.hash160, fetch.n_tx),
-//
-//         z.txs.forEach( txs => {
-//
-//           // Instancia o objeto de transações
-//           let txsValue = conf.txs( txs.time, txs.hash);
-//
-//           txs.inputs.forEach( tx => {
-//
-//             // Instancia o objeto para enviar a wallet.txs.inputs
-//             let txValue = conf.tx( tx.prev_out.addr, tx.prev_out.value, tx.prev_out.spent );
-//
-//             // Insere como objeto na array wallet.txs.inputs
-//             txsValue.inputs.push(txValue);
-//           });
-//
-//           txs.out.forEach( tx => {
-//
-//             // Instancia o objeto para enviar a wallet.txs.out
-//             let txValue = conf.tx(tx.addr, tx.value, tx.spent);
-//
-//             // Insere como objeto na array wallet.txs.out
-//             txsValue.out.push(txValue);
-//           });
-//           // Insere na array wallet.txs
-//           wallet.txs.push(txsValue);
-//         });
-//         // Inserir na array result
-//         result.push(wallet);
-//       });
-//
-//       return result;
-//     }
-//     else{
-//       console.log('Valor inválido em walletPattern');
-//       return 0;
-//     }
-//
-//   } catch (err) {
-//     console.log('Erro na função walletPattern\n', err);
-//   }
-// }
-//
-// /* Padroniza os dados do usuário */
-//
-// userPattern = (array) => {        console.log(model);
-//
-//   try{
-//
-//     // troque true por Array.isArray(array)
-//     if(true){
-//
-//       // Codigo para teste
-//       // Insere dados apenas para teste
-//       let test = conf.data();
-//
-//       // Insere os dados de teste no objeto model
-//       test.forEach( x => {
-//         model.fetch.push(x);
-//       });
-//       // Fim Codigo para teste
-//
-//       // Inicio do código permanente
-//
-//       let result = [];
-//
-//       array.forEach( res => {
-//
-//         // Solicita o método e insere os dados
-//         let user = conf.user(res.user, res.passwd);
-//
-//         // Insere o valor no result
-//         result.push(user);
-//
-//       })
-//
-//       // Testando os valores recebidos
-//       console.log(array);
-//       console.log(result);
-//
-//       // Retorno do objeto
-//       // return model;
-//     }
-//     else{
-//       console.log('Valor inválido em userPattern');
-//       return 0;
-//     }
-//
-//
-//
-//   } catch ( err ) {
-//     console.log('erro em index.userPattern\n', err);
-//   }
-//
-// }
 
 
 /* Buscam por novas transações e invoca a insertWallet()
@@ -226,10 +118,9 @@ walletExplorer = (model) => {
       /* A carteira 1Dzhw2EwFPBpWVuKZqkya5deUqyUUrpsTj e a
          1KDEVePj4eL91ETBKs2HS74AoxABsPWHqe
          é apenas para teste. Nessa área deve ocorrer a Busca
-         por carteiras em uma Colletion especifica antes de se
-         realizar uma inserção*/
+         por carteiras na collection PENDING */
 
-      rest.req(coin.btc.rawaddr('3K9jB6tewg88TXpxKpiuGh8sorX3bHm1ar'))
+      coin.btc.rawaddr('13ceZUnVNPMNfY9X7fiiceyXUKk4YfrTvH')
       .then( res => {
 
         // Insere o valor na array de resultado

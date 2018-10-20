@@ -1,0 +1,10 @@
+//- index.pug
+extends layout/layout.pug
+
+block content
+  div(class='jumbotron jumbotron-fluid')
+    h1(class='display-4')= title
+    ul(class='list-group .list-group-flush ')
+    - var list = ['wallet 1', 'wallet 2', 'wallet 3']
+    each element in list
+      include list.pug
