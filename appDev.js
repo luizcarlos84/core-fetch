@@ -1,71 +1,63 @@
 /* ---------------- Required ---------------- */
 
 // // Required - exports by npm
-const assert = require('assert');
-const bootstrap = require('bootstrap');
 const colors = require('colors');
-const dotenv = require('dotenv').load();
 const express = require('express');
-const MongoClient = require('mongodb').MongoClient;
-const route = express();
+const bodyParse = require('body-parser');
+const root = require('./routers/root');
 
-// // Required - customs exports
-const conf = require('./conf/conf');
-const coin = require('./model/coin');
-const db = require('./repo/db');
-const rest = require('./model/rest');
+// bodyParse
+const urlencodedParser = bodyParse.urlencoded({extended : true});
 
 // express
 const app = express();
-const router = express.Router();
+// const router = express.Router();
 
-// Variaveis
+//  ------------------------ set ------------------------
 
-var acesso = (req, res, next) => {
-  console.log('solicitado', req.originalUrl, 'as', Date.now());
-  next();
-}
+app.set('views', './views');
+app.set('view engine', 'pug');
 
-app.use(acesso);
-
-app.use('/user/:id', (req, res, next) => {
-  console.log('Request type:', req.method);
-  next();
-}, (req, res, next) => {
-  console.log('Request URL:', req.originalUrl)
-  next();
-}, (req, res, next) => {
-  console.log('ID:', req.params);
-  next();
-})
+const fontAwesome = '/node_modules/@fortawesome/fontawesome-free';
+const bootstrap = '/node_modules/bootstrap/dist';
+const jQuery = '/node_modules/jquery/dist';
+const popper = '/node_modules/popper.js/dist';
 
 
-app.get('/', (req, res) => {
-  let result = 'Bem vindo<br>'
-  result += '<small>Horario: ' + req.Time + '</small>'
-  res.send(result);
+//  ------------------------ use (Não remova de proximo do Listen)------------------------
+
+// router
+app.use('/', root);
+
+// bodyParse
+app.use( bodyParse.json());
+app.use( urlencodedParser);
+
+// Statics
+app.use( '/images', express.static(__dirname + '/views/images'));
+app.use( '/jquery', express.static(__dirname + jQuery)); // redirect JS jQuery
+app.use( '/popper', express.static(__dirname + popper)); // redirect JS popper
+app.use( '/js', express.static(__dirname + bootstrap + '/js')); // redirect bootstrap JS
+app.use( '/js', express.static(__dirname + fontAwesome + '/js')); // redirect JS fontawesome
+app.use( '/css', express.static(__dirname + bootstrap + '/css')); // redirect CSS bootstrap
+app.use( '/css', express.static(__dirname + fontAwesome + '/css')); // redirect CSS fontawesome
+
+// Manter no fim dos appuse -   Error Handle
+app.use((req, res, next) => {
+  res.status(404);
+
+  res.render('error/404');
 });
 
-app.get('/index', (req, res) => {
-  res.send('Pagina principal');
+app.use((err, req, res, next) => {
+  res.status(500);
+
+  res.render('error/500', {error : err,});
 });
-
-router.get('/user/:id', (req, res, next) => {
-
-  if(req.params.id === '0') next('route')
-
-  else next()
-}, (req, res, next) => {
-  // let result = 'User'
-  // result += '<br>ID:' + req.params.id;
-  // res.send(result);
-  res.render('regular')
-});
-
-
-
 
 // Listen
-app.listen(3000, () => {
-  console.log('Servidor web na porta 3000');
+var server = app.listen(3000, () => {
+  let host = server.address().address;
+  let port = server.address().port;
+  console.log('Servidor iniciado na porta:', port);
 });

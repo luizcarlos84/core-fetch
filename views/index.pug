@@ -1,10 +1,11 @@
 //- index.pug
+
 extends layout/layout.pug
 
 block content
-  div(class='jumbotron jumbotron-fluid')
-    h1(class='display-4')= title
-    ul(class='list-group .list-group-flush ')
-    - var list = ['wallet 1', 'wallet 2', 'wallet 3']
-    each element in list
-      include list.pug
+  
+  div(class='jumbotron my-3 px-3')
+    h1(class='display-4')= jumbotron
+    p(class='lead')= subtitle
+    p(class='lead')= url
+    a(class='btn btn-primary btn-lg' href='#' role='button')= more

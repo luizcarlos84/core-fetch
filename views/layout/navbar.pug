@@ -1,14 +1,18 @@
 //- navbar.pug
+
 - var navAttrib = {};
-- navAttrib.class = ['navbar', 'navbar-inverse', 'fixed-top-lg', 'navbar-expand-lg', 'navbar-dark', 'bg-info'];
+- navAttrib.class = ['navbar', 'sticky-top', 'bg-dark', 'fixed-top-md', 'navbar-expand-md'];
+
+- var aAttrib = {};
+- aAttrib.class = ['nav-link','text-warning'];
 
 nav(class=navAttrib.class)
 
   a(
-  class='navbar-brand'
-  href='#'
+  class='navbar-brand text-warning'
+  href='./'
   ):  i(
-      class='fas fa-code-branch fa-2x'
+      class='fas fa-draw-polygon fa-2x'
       )
 
 
@@ -21,45 +25,28 @@ nav(class=navAttrib.class)
   aria-expanded='false'
   aria-label='Toggle navigation'
   )
-
-    span(class='navbar-toggler-icon')
+    span(class='fas fa-bars text-warning')
 
   div(
   class='collapse navbar-collapse'
   id='navbarToggler'
   )
     ul(class='navbar-nav mr-auto mt-2 mt-lg-0')
-      li(class='nav-item active')
-        a(class='nav-link' href='#') home
-          span(class='sr-only') (current)
       li(class='nav-item')
-        a(class='nav-link' href='#') Feature
+        a(class=aAttrib.class href='/login') Register
       li(class='nav-item')
-        a(class='nav-link' href='#') Pricing
+        a(class=aAttrib.class href='#') Code
 
-    form(class='form-inline my-2 my-lg-0')
-      input(
-      type='email'
-      class='form-control mr-sm-2 my-sm-0'
-      id='InputEmail1'
-      aria-describedby='emailHelp'
-      placeholder='Email'
-      )
-
-      input(
-      type='password'
-      class='form-control mr-sm-2 my-sm-0'
-      id='InputPassword1'
-      placeholder='Password'
-      )
-      
-      input(
-      type='checkbox'
-      class='form-check-input mr-sm-2 my-sm-0'
-      id='Check1'
-      )
-      
-      button(
-      type='submit'
-      class='btn btn-outline-warning mr-sm-2 my-sm-0'
-      ) Login
+    a(
+    class=aAttrib.class
+    href='./register'
+    role='button'
+    ) Register 
+      span(class="far fa-address-card")
+    
+    a(
+    class=aAttrib.class
+    href='/login'
+    role='button'
+    ) Login 
+      span(class="fas fa-sign-in-alt")

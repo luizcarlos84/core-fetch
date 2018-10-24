@@ -1,0 +1,40 @@
+//-register.pug
+extends layout/layout.pug
+    
+block content
+  
+  //- atributos do container principal
+  - var divAtr = {};
+  - divAtr = ['container', 'my-3', 'py-3', 'col-md-6'];
+
+  //- Campo de texto ocupa toda as 12 colunas
+  - var divFormFullfAtr = {};
+  - divFormFullfAtr.class = ['form-group', 'col-md-12'];
+  
+  //- Campo de texto ocupa 6 colunas (meia tela)
+  - var divFormHalfAtr = {};
+  - divFormHalfAtr.class = ['form-group', 'col-md-6'];
+
+
+
+  div(class= divAtr)
+    h1(class='display-4') Registre e experimente
+    p(class='lead')= url
+    
+    form(action='/done' method='post')
+      div(class='form-row')
+        div(class= divFormHalfAtr.class)
+          label(for='InputUserName1')= username
+          input(type='text' class='form-control' name='InputUserName' id='InputUserName1' placeholder= username )
+            
+        div(class= divFormHalfAtr.class)
+          label(for='InputEmail1')= email
+          input(type='email' class='form-control' name='InputEmail' id='InputEmail1' placeholder=email)
+        
+        div(class= divFormFullfAtr.class)
+          label(for='InputPassword1')= password
+          input(type='password' class='form-control' name='InputPassword' id='InputPassword1' aria-describedby='passwordHelp' placeholder=password)
+          small(id='passwordHelp' class='form-text text-muted') Nunca compartilhe sua senhas.
+            
+        button(type='submit' class='btn btn-outline-primary btn-block')= submit
+        

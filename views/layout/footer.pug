@@ -1,51 +1,46 @@
-// Footer.pug
+//- Footer.pug
+
+- var footerAttrib = {};
+- footerAttrib.class = ['page-footer', 'font-small', 'bg-dark', 'content-center'];
+- footerAttrib.style = 'position: relative; bottom: 0%;';
+
+- var iAttrib = {};
+- iAttrib.class = ['fa-lg', 'm-3', 'fa-3x', 'text-white'];
+- iAttrib.style = '';
+
 footer(
-style='height: 200px;'
-class='page-footer font-small bg-info darken-3 content-center'
+class= footerAttrib.class
+style= footerAttrib.style
 )
 
-  // Footer Elements
+  //- Footer Elements
   div(class='container col-12 col-md-8')
 
-    // Grid column
-    div(
-    class='col-12 col-md-12 content-center'
-    )
+    div(class='text-center py-3')
 
-      // Grid row
-      div(
-      class='d-flex justify-content-center'
-      )
-        div(class='mx-auto')
-          
-          
-          - var iAttrib = {};
-          - iAttrib.class = ['fa-lg', 'white-text', 'mr-md-5', 'mr-3', 'fa-3x'];
+      //- Facebook
+      a(class='fb-ic')
+        i(class='fab fa-facebook' class= iAttrib.class)
 
-          // Facebook
-          a(class='fb-ic')
-            i(class='fab fa-facebook' class= iAttrib.class)
+      //- Twitter
+      a(class='tw-ic')
+        i(class='fab fa-twitter' class= iAttrib.class)
 
-          // Twitter
-          a(class='tw-ic')
-            i(class='fab fa-twitter' class= iAttrib.class)
+      //- Google +
+      a(class='gplus-ic')
+        i(class='fab fa-google-plus' class= iAttrib.class)
 
-          // Google +
-          a(class='gplus-ic')
-            i(class='fab fa-google-plus' class= iAttrib.class)
+      //- Linkedin
+      a(class='li-ic')
+        i(class='fab fa-linkedin' class= iAttrib.class)
 
-          // Linkedin
-          a(class='li-ic')
-            i(class='fab fa-linkedin' class= iAttrib.class)
+      //- Instagram
+      a(class='ins-ic')
+        i(class='fab fa-instagram' class= iAttrib.class)
 
-          // Instagram
-          a(class='ins-ic')
-            i(class='fab fa-instagram' class= iAttrib.class)
+      //- Pinterest
+      a(class='pin-ic')
+        i(class='fab fa-pinterest' class= iAttrib.class)
 
-          // Pinterest
-          a(class='pin-ic')
-            i(class='fab fa-pinterest' class= iAttrib.class)
-
-  // Copyright
-  div(class='footer-copyright text-center py-3') © 2018 Copyright:
-    a(href='#') peer2you.com
+  //- Copyright
+  div(class='footer-copyright text-center py-3 text-white') © 2018 Copyright: peer2you.com
