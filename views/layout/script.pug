@@ -1,33 +1,12 @@
 //- script.pug
 
-//- jQuery js
-script(
-  src='/jquery/jquery.js'
-)
+//- JavaScript
+- var src = ['/jquery/jquery.js', '/popper/popper.js', '/js/bootstrap.js', '/js/all.js' ]
+each element in src
+  script(src= element)
 
-//- popper .js
-script(
-  src='/popper/popper.js'
-)
-
-//- Bootstrap js
-script(
-src='/js/bootstrap.js'
-)
-
-//- fontAwesome js
-script(
-src='/js/all.js'
-)
-
-//- Bootstrap CSS
-link(
-rel='stylesheet'
-href='/css/bootstrap.css'
-)
-
-//- fontAwesome css
-link(
-rel='stylesheet'
-href='/css/all.css'
-)
+//- CSS  
+-var href = ['/css/bootstrap.css', '/css/all.css', '/css/custom.css']
+each element in href
+  link(rel='stylesheet' type='text/css' href= element)
+  

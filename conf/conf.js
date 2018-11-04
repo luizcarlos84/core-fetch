@@ -6,22 +6,36 @@
 const db = {
 
   // Variaveis
-  host   : 'mongodb://localhost:27017/',
-  base   : ['wallet','users'],
-  coll   : ['wallet', 'users','pending', 'owner'],
+  host   : 'localhost',
+  port   : 27017,
+  base   : ['wallet', 'users', 'session'],
+  coll   : ['wallet', 'users', 'pending', 'owner'],
   adm    : ['config'],
 
   /* gets*/
 
+  address     : function(port){
+    if( typeof(port) == 'number')
+      return 'mongodb://' + this.host + ':' + port + '/';
+    else
+      return 'mongodb://' + this.host + '/';
+  },
+
+
   /* Host das carteiras*/
-  hostwallet   : function(){
-    return this.host + this.base[0];
+  hostwallet  : function(){
+    return this.address(this.port) + this.base[0];
   },
 
   /* host dos usuários */
-  hostuser     : function(){
-    return this.host + this.base[1];
+  hostuser    : function(){
+    return this.address(this.port) + this.base[1];
   },
+
+  /* host de sessão */
+  hostsession : function(){
+    return this.address(this.port) + this.base[2];
+  }
 };
 
 /* -------------------Modelo de manupulação de dados-------------------
@@ -152,7 +166,11 @@ const walletOwnerProj = () => {
   }
 };
 
+/* -------------------bcrypt config------------------- */
 
+const bcrypt = {
+  'saltRounds' : () => { return 10 },
+}
 
 
 
@@ -164,3 +182,4 @@ module.exports.txs = txs;
 module.exports.tx = tx;
 module.exports.user = user;
 module.exports.walletPending = walletPending;
+module.exports.bcrypt = bcrypt;

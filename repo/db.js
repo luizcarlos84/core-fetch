@@ -2,6 +2,7 @@
 
 // // Required - exports by npm
 const assert = require('assert');
+const bcrypt = require('bcrypt');
 const colors = require('colors');
 const dotenv = require('dotenv').load();
 const express = require('express');
@@ -19,13 +20,25 @@ const rest = require('../model/rest');
 
 // Promise inicia a conexão
 const connect = () => {
-  return new Promise( (resolve, reject) => {
-    MongoClient.connect( conf.db.hostwallet() , { useNewUrlParser: true }, (err, client) => {
+  return new Promise( (res, rej) => {
+    MongoClient.connect( conf.db.hostwallet() , {
+      useNewUrlParser: true
+    }, (err, client) => {
       assert.equal(null, err);
       console.log('MongoDB:'.blue,'Conexão aberta'.green);
-      resolve(client);
+      res(client);
     });
-  })
+  });
+}
+
+const global = () => {
+  MongoClient.connect( conf.db.hostwallet() , {
+    useNewUrlParser: true
+  }, (err, client) => {
+    assert.equal(null, err);
+    console.log('MongoDB:'.blue,'Conexão aberta'.green);
+    res(client);
+  });
 }
 
 // Delay
@@ -44,17 +57,14 @@ findOne = async (db, coll, query, options) => {
   let result
 
   // Abre a conexão como promise e armazena resultado na variavel de saída
-  return await connect().then( async client => {
+  return await connect().then( client => {
 
     console.log('MongoDB:'.blue,'findOne: DB:'.green, db, 'Collection:'.green, coll);
 
-    // É necessário um delay para abertura de conexão com o banco
-    result = await delay(20).then( () => {
-      if(typeof(options) == 'object')
-        return client.db(db).collection(coll).findOne(query, options);
-      else
-        return client.db(db).collection(coll).findOne(query);
-    });
+    if(typeof(options) == 'object')
+      result = client.db(db).collection(coll).findOne(query, options);
+    else
+      result = client.db(db).collection(coll).findOne(query);
 
     return client;
 
@@ -85,13 +95,10 @@ findToArray = async (db, coll, query, options) => {
 
       console.log('MongoDB:'.blue,'findToArray: DB:'.green, db, 'Collection:'.green, coll);
 
-      // É necessário um delay para abertura de conexão com o banco
-      result = await delay(20).then( () => {
-        if(typeof(options) == 'object')
-          return client.db(db).collection(coll).find(query, options).toArray();
-        else
-          return client.db(db).collection(coll).findOne(query).toArray();
-      });
+      if(typeof(options) == 'object')
+        result = client.db(db).collection(coll).find(query, options).toArray();
+      else
+        result = client.db(db).collection(coll).findOne(query).toArray();
 
       return client;
 
@@ -395,8 +402,85 @@ findWallet = async (wallet) => {
   }
 }
 
-// (VAZIO) Realiza busca de usuários e retorna
-findUser = (user) => {
+// Busca e retorna usuários de acordo com o nome do usuário
+findUser = (username) => {
+
+  let d = conf.db;
+  let db = d.base[1];
+  let coll = d.coll[1];
+
+  if(typeof(username) == 'string'){
+
+    query = {'username': username};
+    // Inserir essa projeção no arquivo config
+    projection = {
+      projection:{
+        '_id'     : 0,
+        'username': 1,
+        'email'   : 1,
+        'passwd'  : 1 }
+    };
+
+    return findOne(db, coll, query, projection);
+
+    // return new Promise((resolve, reject) => {
+    //
+    //   console.log('findUser:'.blue, 'Salvando:'.green, );
+    //   let result = findOne(db, coll, query, projection);
+    //   resolve(result);
+    //
+    // }).catch( err => {
+    //   console.log('findUser'.blue,'Error em Promisse:'.yellow, user);
+    //   return err;
+    // });
+  }
+  else{
+
+    console.log('findUser'.blue,'Objeto inválido:'.yellow, user);
+    // Valores inválidos retornam null
+    return null;
+
+  }
+
+}
+
+findUserById = (id) => {
+  const ObjectId = require("mongodb").ObjectId;
+
+  let d = conf.db;
+  let db = d.base[1];
+  let coll = d.coll[1];
+
+  if(typeof(id) == 'string'){
+
+    query = {'_id': ObjectId(id)};
+    // Inserir essa projeção no arquivo config
+    projection = {
+      projection:{
+        '_id'     : 1,
+        'username': 1,
+        'email'   : 1,
+        'passwd'  : 1 }
+    };
+
+    return new Promise((resolve, reject) => {
+
+      console.log('findUser:'.blue, 'Salvando:'.green, );
+      let result = findOne(db, coll, query, projection);
+      resolve(result);
+
+    }).catch( err => {
+      console.log('findUser'.blue,'Error em Promisse:'.yellow, user);
+      return err;
+    });
+  }
+  else{
+
+    console.log('findUser'.blue,'Objeto inválido:'.yellow, user);
+    // Valores inválidos retornam null
+    return null;
+
+  }
 
 }
 
@@ -437,7 +521,7 @@ insertWallet = (obj) => {
   }
   else{
     console.log(colors.blue(log_name),'Valor inválido:'.yellow, typeof(obj));
-    return 0;
+    return null;
   }
 }
 
@@ -452,12 +536,22 @@ insertUser = async (user) => {
   if(typeof(user) == 'object' ){
     if(typeof(user.username) == 'string'){
 
-      new Promise((resolve, reject) => {
+      // Promisse para criptografar a senha do usuário
+      bcrypt.hash( user.passwd, conf.bcrypt.saltRounds())
+      .then( hash => {
+
+        return hash;
+
+      }).then( value => {
+
+        user.passwd = value;
+
+      }).then( () => {
         console.log('insertUser:'.blue, 'Salvando:'.green, user.username);
         insertOne(db, coll, user);
-        resolve(0);
 
       }).then( async () => {
+        // Busca as finformações inseridas no banco
         let result = await findOne(db, coll, { }, { projection:{ '_id': 1, 'wallets': 1 } })
         return result;
 
@@ -465,7 +559,9 @@ insertUser = async (user) => {
 
         console.log(res);
         // Insere as wallets informadas pelo usuário na collection  de pendencias
-        await insertPendingWallet(res._id, res.wallets);
+        if(res.wallets.length > 0){
+          await insertPendingWallet(res._id, res.wallets);
+        }
 
       }).catch( err => {
         console.log(err);
@@ -479,8 +575,8 @@ insertUser = async (user) => {
   }
   else{
     console.log('insertUser'.blue,'Valor inválido:'.red, typeof(user));
-    // Valores inválidos retornam zero
-    return 0;
+    // Valores inválidos retornam nulo
+    return null;
   }
 
 }
@@ -505,11 +601,12 @@ module.exports.insertWallet = insertWallet;
 // module.exports.updateWallet = updateWallet;
 
 // users
-// module.exports.findUser = findUser;
+module.exports.findUser = findUser;
 module.exports.insertUser = insertUser;
 // module.exports.updateUser = updateUser;
 
 //Temporario
+module.exports.global = global;
 module.exports.findOne = findOne;
 module.exports.findToArray = findToArray;
 module.exports.unknownWallet = unknownWallet;

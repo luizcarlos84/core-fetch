@@ -2,6 +2,7 @@
 
 // // Required - exports by npm
 const assert = require('assert');
+const bcrypt = require('bcrypt');
 const colors = require('colors');
 const dotenv = require('dotenv').load();
 const express = require('express');
@@ -30,90 +31,15 @@ var e = '3MSCFLrkEhiEzigXcoaCVeJwouJtz9Ye6A' //novo
 var f = '13ceZUnVNPMNfY9X7fiiceyXUKk4YfrTvH' //novo
 var x = ['a', 'b', 'c', 'd'];
 var y = []
-var id = '123456'
+var senha = '123456'
 
-var wallet = f;
+var wallet;
 
 
-var usuario = conf.user('Luiz', 'admin123');
+var usuario = conf.user('Admin', 'admin@rmail.com', '123456');
 usuario.wallets.push(a);
 usuario.wallets.push(b);
 usuario.wallets.push(c);
 usuario.wallets.push(d);
 usuario.wallets.push(e);
 usuario.wallets.push(f);
-
-// let d = conf.db;
-// let db1 = d.base[0]
-// let coll = d.coll[0]
-
-
-// console.log(typeof(usuario));
-// console.log(typeof(usuario.username));
-console.log(usuario);
-console.log(__dirname);
-
-// console.log('Carteira: %s3'.green, colors.blue('teste'), e );
-
-// db.insertUser(usuario);
-// console.log(wallet);
-// console.log(db1);
-// console.log(coll);
-// db.findOne(db1, coll, {}, { projection:{ '_id': 1 } }).then(res => {
-//   console.log(res);
-// });
-
-
-// new Promise(async function(resolve, reject) {
-//   tx = await db.unknownWallet(wallet);
-//   resolve(tx);
-// }).then( async res => {
-//   console.log('1',res);
-// });
-
-
-// db.insertWalletPending(usuario._id, usuario.wallets);
-
-// client = db.connect();
-//
-// client.then( async res => {
-//   let result = await db.unknownWallet(res, a);
-//   console.log(result);
-//   return res;
-// }).catch(err => {
-//   console.log(err);
-// })
-
-
-
-
-
-/* ---------------- Area de Testes ----------------
-Fique a vontade para testar qualquer parametros após
-esse comentário.
-Evite usar o index.js deixando vestígios de código.
-*/
-
-// rest.req(test).then(res =>{
-//   console.log(res);
-// })
-
-// Controle de array
-// console.log(x);
-// x.splice(0);
-// console.log(x);
-
-
-// busca(c).then( res => {
-//   console.log(res);
-//   console.log(d.length);
-//   console.log(e.length);
-//
-// }).catch( err => {
-//   console.log('Erro em indexDev.js.busca\n', err);
-//
-// })
-//
-// x.forEach((element, index, array) => {
-//   console.log(element, ' ', index, ' ', array);
-// })

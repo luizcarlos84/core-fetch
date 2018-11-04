@@ -1,6 +1,7 @@
 /* ---------------- Required ---------------- */
 
 // // Required - exports by npm
+const bcrypt = require('bcrypt');
 const colors = require('colors');
 const express = require('express');
 const bodyParse = require('body-parser');
@@ -35,6 +36,7 @@ app.use( urlencodedParser);
 
 // Statics
 app.use( '/images', express.static(__dirname + '/views/images'));
+app.use( '/css', express.static(__dirname + '/views/css')); // Custom CSS
 app.use( '/jquery', express.static(__dirname + jQuery)); // redirect JS jQuery
 app.use( '/popper', express.static(__dirname + popper)); // redirect JS popper
 app.use( '/js', express.static(__dirname + bootstrap + '/js')); // redirect bootstrap JS
@@ -45,14 +47,12 @@ app.use( '/css', express.static(__dirname + fontAwesome + '/css')); // redirect 
 // Manter no fim dos appuse -   Error Handle
 app.use((req, res, next) => {
   res.status(404);
-
   res.render('error/404');
 });
 
 app.use((err, req, res, next) => {
   res.status(500);
-
-  res.render('error/500', {error : err,});
+  res.render('error/500', {error : err});
 });
 
 // Listen

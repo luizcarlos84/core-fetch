@@ -1,62 +1,87 @@
-/* ---------------- Required ---------------- */
-
-// // Required - exports by npm
-const colors = require('colors');
+const bcrypt = require('bcrypt');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const LocalStrategy = require('passport-local').Strategy;
 const express = require('express');
-const bodyParse = require('body-parser');
-const root = require('./routers/root');
+const mongoClient = require('mongodb').MongoClient;
+const passport = require('passport');
+const session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
 
 // bodyParse
-const urlencodedParser = bodyParse.urlencoded({extended : true});
-
-// express
+const urlencodedParser = bodyParser.urlencoded({extended : true});
 const app = express();
-// const router = express.Router();
 
-//  ------------------------ set ------------------------
+// Custom require
+const conf = require('./conf/conf');
+const db = require('./repo/db');
+const rootDev = require('./routers/rootDev')
 
-app.set('views', './views');
+// Pug config
 app.set('view engine', 'pug');
+app.set('views', __dirname + '/viewsDev');
 
-const fontAwesome = '/node_modules/@fortawesome/fontawesome-free';
-const bootstrap = '/node_modules/bootstrap/dist';
-const jQuery = '/node_modules/jquery/dist';
-const popper = '/node_modules/popper.js/dist';
+passport.serializeUser((user, done) => {
+   done(null, user._id);
+});
 
+passport.deserializeUser((id, done) => {
+   db.findUserById(id).then( (err,user) => {
+       done(err, user);
+   });
+});
 
 //  ------------------------ use (Não remova de proximo do Listen)------------------------
 
+app.use(session({
+  store: new MongoStore({
+    db: conf.db.hostsession(),
+    ttl: 30 * 60 // = 30 minutos de sessão
+  }),
+  secret: '123',//configure um segredo seu aqui
+  resave: false,
+  saveUninitialized: false
+}));
+
+
+passport.use(new LocalStrategy(
+  function(username, password, done){
+    db.findUser( username )
+    .then( async function(user, err){
+
+      if (err)
+        return done(err);
+
+      if (!user)
+        return done(null, false);
+
+      return await user;
+
+    }).then( function(user, err){
+      bcrypt.compare(password, user.passwd, function(err, isValid){
+        if (err)
+          return done(err);
+
+        if (!isValid)
+          return done(null, false);
+
+        return done(null, user);
+        });
+      });
+    }));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 // router
-app.use('/', root);
+app.use('/', rootDev);
 
 // bodyParse
 app.use( bodyParse.json());
 app.use( urlencodedParser);
 
-// Statics
-app.use( '/images', express.static(__dirname + '/views/images'));
-app.use( '/jquery', express.static(__dirname + jQuery)); // redirect JS jQuery
-app.use( '/popper', express.static(__dirname + popper)); // redirect JS popper
-app.use( '/js', express.static(__dirname + bootstrap + '/js')); // redirect bootstrap JS
-app.use( '/js', express.static(__dirname + fontAwesome + '/js')); // redirect JS fontawesome
-app.use( '/css', express.static(__dirname + bootstrap + '/css')); // redirect CSS bootstrap
-app.use( '/css', express.static(__dirname + fontAwesome + '/css')); // redirect CSS fontawesome
 
-// Manter no fim dos appuse -   Error Handle
-app.use((req, res, next) => {
-  res.status(404);
-
-  res.render('error/404');
-});
-
-app.use((err, req, res, next) => {
-  res.status(500);
-
-  res.render('error/500', {error : err,});
-});
-
-// Listen
-var server = app.listen(3000, () => {
+const server = app.listen(3000, () => {
   let host = server.address().address;
   let port = server.address().port;
   console.log('Servidor iniciado na porta:', port);
