@@ -4,9 +4,7 @@
 const assert = require('assert');
 const colors = require('colors');
 const dotenv = require('dotenv').load();
-const express = require('express');
 const MongoClient = require('mongodb').MongoClient;
-const route = express();
 
 // // Required - customs exports
 const conf = require('./conf/conf');
