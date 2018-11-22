@@ -64,16 +64,19 @@ miner   : Carteira de um possível mineiro
 pool    : Carteira de um sistema de mineração em cooperação */
 
 
-const wallet = (address, hash160, n_tx) => {
+const wallet = (address, hash160, own, rec, sen, bal, n_tx) => {
   return {
    "_id"      : address,
    "hash160"  : hash160,
    "ver"      : 1,
-   "owner"    : "",
+   "owner"    : own,
+   "received" : rec,
+   "sent"     : sen,
+   "balance"  : bal,
    "confirmed": false,
-   "orphan"   : true,
    "miner"    : false,
    "pool"     : false,
+   "score"    : {},
    "n_tx"     : n_tx,
    "txs"      : []
  }
@@ -102,13 +105,6 @@ const tx = (addr, value, spent) => {
   }
 };
 
-const walletPending = (idUser, wallet) => {
-  return {
-    "_idUser"   : idUser,
-    "wallet"    : wallet,
-  }
-};
-
 
 /* -------------------Modelo de dados para usuários-------------------
 
@@ -120,51 +116,18 @@ const walletPending = (idUser, wallet) => {
  rate      :
  */
 
- const user = (username, email, passwd) => {
+ const user = (username, passwd, email) => {
    return {
      "ver"      : 1,
      "username" : username,
      "email"    : email,
      "passwd"   : passwd,
+     "score"    : 0,
      "wallets"  : [],
-     "rate_avg" : -1,
+     "rate_avg" : 0,
      "rate"     : []
    }
  };
-
- /* -------------------projection------------------- */
-
-const walletUserProj = () => {
-  return { projection: {
-   '_id'      : 1,
-   'hash160'  : 1,
-   'ver'      : 0,
-   'owner'    : 0,
-   'confirmed': 1,
-   'orphan'   : 0,
-   'miner'    : 0,
-   'pool'     : 0,
-   'n_tx'     : 1,
-   'txs'      : 0
-    }
-  }
-};
-
-const walletOwnerProj = () => {
-  return { projection: {
-   '_id'      : 1,
-   'hash160'  : 1,
-   'ver'      : 0,
-   'owner'    : 0,
-   'confirmed': 1,
-   'orphan'   : 1,
-   'miner'    : 0,
-   'pool'     : 0,
-   'n_tx'     : 1,
-   'txs'      : 1
-    }
-  }
-};
 
 /* -------------------bcrypt config------------------- */
 
@@ -181,5 +144,4 @@ module.exports.wallet = wallet;
 module.exports.txs = txs;
 module.exports.tx = tx;
 module.exports.user = user;
-module.exports.walletPending = walletPending;
 module.exports.bcrypt = bcrypt;

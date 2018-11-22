@@ -5,8 +5,8 @@
   "description": "Analisador de informações de carteiras",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "node indexDev.js"
+    "start": "reset && node index.js",
+    "test": "reset && nodemon index.js"
   },
   "author": "Luiz Carlos Nunes",
   "email": "luizcarlosnunes@hotmail.com",
