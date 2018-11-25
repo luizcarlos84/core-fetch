@@ -149,8 +149,6 @@ var findWalletToArray = (query, options, callback) => {
 }
 
 
-
-
 /* Atualiza informações da carteira */
 
 var updateWallet = (wallet, update) => {
@@ -370,11 +368,13 @@ var walletPending = () => {
     query0 = {$or: [{'_id': {$eq : doc.wallet}}, {'hash160': {$eq : doc.wallet}}]}
     findWallet(doc.wallet, {}, (err, doc) => {
 
+      // Se a wallet existe
       if(doc){
-        // Se a wallet existe
 
+        // Se houver proprietario
         if (doc.owner){
 
+          // Se o solicitante for o proprietario
           if(doc._idUser.equals(doc.owner)) {
             // Verifica se possui dono
             console.log('walletPending:'.blue, doc._id,'é de sua propriedade'.yellow);
@@ -393,7 +393,7 @@ var walletPending = () => {
         else{
           // Insere o ID do solicitante
           db.findOneAndUpdate(db0, coll0, query0, { $set: { 'owner': doc._idUser} }, {});
-          console.log('walletPending:'.blue, 'Proprietário inserido'.green);
+          console.log('walletPending:'.blue, 'Proprietário inserido');
 
           // Remove do Pending
           deletePending( doc.wallet );
@@ -411,7 +411,7 @@ var walletPending = () => {
           deletePending( doc.wallet );
 
         })
-        console.log('walletPending:'.blue, 'Carteira Inserida'.green);
+        console.log('walletPending:'.blue, 'Carteira Inserida');
       }
     })
   }//checkPending
@@ -448,7 +448,6 @@ var walletPending = () => {
 scoreHolder = () => {
   let exchange = [] //filtra e armazena as transações da busca em objetos,
       total = 0, // tempo de investimento somado todos os periodos
-      parcial = 0, //armazena o tempo inicial de um deposito
       saldo = 0, //armazena um saldo quando depositado
       agora = Math.round(Date.now()/1000), //tempo exato das transações (epoch)
       tempoInicial = 0, //Data primeira transação (epoch)
@@ -461,7 +460,7 @@ scoreHolder = () => {
 
   let orderScore = (err, doc) => {
 
-    /* Organiza as transações dentro da array exchange */
+    // Organiza as transações dentro da array exchange
     doc.txs.forEach( element => {
 
       element.inputs.forEach( element1 => {
@@ -482,7 +481,7 @@ scoreHolder = () => {
 
 
 
-    /* Colocar na ordem do mais antigo ao mais recente */
+    // Colocar na ordem do mais antigo ao mais recente
     let compare = (a, b) => {
       if( a.time < b.time )
         return -1;
@@ -491,10 +490,9 @@ scoreHolder = () => {
       return 0;
     }
 
+    // Executa o compare
     exchange.sort(compare);
 
-    console.log(exchange[exchange.length - 1].out);
-    console.log(exchange.length);
     // As arrays com os objetos usam map para criar uma array de variavel time
     if(exchange[exchange.length - 1].out)
       tempoFinal = agora;
@@ -502,66 +500,123 @@ scoreHolder = () => {
       tempoFinal = Math.max.apply(Math, exchange.map( x => {return x.time}));
 
     tempoInicial = Math.min.apply(Math, exchange.map( x => {return x.time}));
-    tempoMedio = tempoFinal - tempoInicial;
+    tempoMedio = agora - tempoInicial;
+
 
     calcScore(doc);
   }
+
 
   let calcScore = (doc) => {
 
 
     /* Calcula e insere o tempo de investimento na array periodo */
-    periodo = exchange.map((element, index) => {
-      if (element.out){
+    let calcPeriodo = (element, index) => {
+      if(index == 0){
 
-        // Se for o ultimo element
-        if(index == exchange.length - 1){
+        // normalmente a carteira inicia com uma entrada
+        if(element.out){
           saldo += element.out;
-          return (tempoFinal - element.time);
+          parcial = tempoInicial;
 
+          return 0;
         }
-        else{
+
+      }
+      else if( index < (exchange.length - 1)){
+
+
+        if(element.out){
 
           if(saldo > 0){
-            parcial = element.time;
             saldo += element.out;
-            return (element.time - parcial);
+
+            return 0;
           }
           else{
             parcial = element.time;
             saldo += element.out;
-            return (0);
+
+            return 0;
+          }
+
+        }
+
+        if(element.input){
+
+          saldo -= element.input;
+
+          if(saldo > 0){
+
+            return 0;
+          }
+          else{
+
+            return (element.time - parcial);
+          }
+
+        }
+
+
+      }
+      else {
+
+        if(element.out){
+
+          saldo += element.out;
+
+          return (tempoFinal - element.time);
+
+        }
+
+        if(element.input){
+
+          saldo -= element.input;
+
+          if(saldo > 0){
+
+            return 0;
+          }
+          else{
+
+            return (element.time - parcial);
           }
 
         }
 
       }
 
-      if (element.input){
-
-        saldo -= element.input;
-        return (element.time - exchange[index - 1].time);
-
-
-      }
-
-    }); //for exchange.map
+    }//calcPeriodo
+    let parcial;
+    periodo = exchange.map( calcPeriodo );
 
     let reducer = (total, soma) => {
       return total + soma
     }
 
-    total = periodo.reduce(reducer);
+    // Soma os periodos e armazena em total
+    total = periodo.reduce( reducer );
 
-    percentScore(doc);
+    //
+    exchange.forEach( (element, index) => {
+
+      // as variaveis exchange e periodo possuem o mesmo tamanho
+      if(exchange.length == periodo.length){
+
+        Object.assign( element , {periodo: periodo[index]})
+      }
+    })
+
+
+    percentScore( doc );
   }
 
   let percentScore = (doc) => {
 
-    /* tempoScore = Realiza o um calculo entre cada periodo de debito e credito
+    /* calcPercent = Realiza o um calculo entre cada periodo de debito e credito
        e retorna um score baseado no tempo inicial e final.
-       tempoScore tem atributo LET para existir apenas na função scoreHolder */
-    let tempoScore = ( tempoParcial ) => {
+       calcPercent tem atributo LET para existir apenas na função scoreHolder */
+    let calcPercent = ( tempoParcial ) => {
 
 
 
@@ -581,10 +636,9 @@ scoreHolder = () => {
     }
 
     // Calcula o score e armazena na array percent
-
-    percent = periodo.map( (element, index) => {
-      console.log('tempoScore', element, index);
-      let x = tempoScore(element)
+    let sortPercent = (element, index) => {
+      // console.log('calcPercent', element, index);
+      let x = calcPercent(element)
 
       if(element > 0){
         return x;
@@ -592,28 +646,69 @@ scoreHolder = () => {
       else{
         return 0;
       }
-      // Somar o tempo armazenado
-      score += x;
-    })
+    }
 
+    // armazena as percentagem em array
+    percent = periodo.map( sortPercent )
+
+    // realiza a soma dos valores em uma array
     let reducer = (total, soma) => {
       return total + soma
     }
 
-    score = percent.reduce(reducer);
+    // armazena a soma em uma variavel
+    score = percent.reduce( reducer );
+
+
+    exchange.forEach( (element, index) => {
+
+      // as variaveis exchange e periodo possuem o mesmo tamanho
+      if(exchange.length == percent.length){
+
+        Object.assign( element , {percent: percent[index]})
+      }
+    })
+
 
     saveScore(doc);
   }
 
   let saveScore = (doc) => {
     // Salva ou atualiza a reputação na carteira
+
+    let temp = [];
+
+    exchange.forEach((element, index) => {
+      if(element.out)
+        temp.push({
+          "time"   : element.time,
+          "out"    : element.out,
+          "periodo": element.periodo,
+          "percent": element.percent
+        })
+      else {
+        temp.push({
+          "time"   : element.time,
+          "input"    : element.input,
+          "periodo": element.periodo,
+          "percent": element.percent
+        })
+      }
+    })
+
     updateWallet(doc._id,{
       $set: {
-        'score.periodo' : periodo,
-        'score.percent' : percent,
-        'score.total'   : score
+        'score.timestamp': Date.now(),
+        'score.score' : score
+      },
+      $push: {
+        'score.exchange': {
+          $each: temp,
+          $sort: {time: -1}
+        }
       }
     });
+
 
     resultScore();
   }
@@ -621,11 +716,8 @@ scoreHolder = () => {
   let resultScore = () => {
 
       // Resultados para visualização no console
-      console.log('periodo', periodo);
-      console.log('percent', percent);
       console.log('exchange\n', exchange);
       console.log('agora', agora);
-      console.log('parcial', parcial);
       console.log('score', score );
       console.log('data atual', Math.round(agora), new Date(Date.now()).toDateString());
       console.log('Data inicio', tempoInicial, new Date(tempoInicial * 1000).toDateString());
@@ -634,7 +726,7 @@ scoreHolder = () => {
       console.log('Tempo investindo(segundos)', total);
       console.log('Tempo sem investir(segundos)', tempoMedio - total );
       console.log('Porcentagem tempo de investimento', (total *100) / tempoMedio );
-      console.log('score', score);
+      console.log('score', score.toFixed(2));
 
       clearScore();
   } //resultScore
@@ -643,7 +735,6 @@ scoreHolder = () => {
 
     exchange.splice(0); //filtra e armazena as transações da busca em objetos,
     total = 0; // tempo de investimento somado todos os periodos
-    parcial = 0; //armazena o tempo inicial de um deposito
     saldo = 0; //armazena um saldo quando depositado
     agora = Math.round(Date.now()/1000); //tempo exato das transações (epoch)
     tempoInicial = 0; //Data primeira transação (epoch)
@@ -654,10 +745,11 @@ scoreHolder = () => {
     score = 0;
   }
 
-
-
+  //Subrair em milisegundos (segundo * 1000)
+  let cronos = Date.now() - 90000;
   // Variaveis para o banco
-  let query = {},
+
+  let query = { 'score.timestamp' : {$lt : cronos }},
       options = { projection: {
         '_id'  : 1,
         'owner': 1,
@@ -672,10 +764,13 @@ scoreHolder = () => {
       array.forEach( (doc, index) => {
 
         /* O Objetivo é que cada valor na array tenha um espaço de tempo
-        para a execução. Então cada elemento tera um espaço de 10 segundos*/
+        para a execução. Então cada elemento tera um espaço de 5 segundos*/
         setTimeout(() => {orderScore(err, doc)}, 5000 * index)
 
       }); //array.forEach
+    else {
+      console.log('scoreHolder:'.blue, 'Sem carteiras para atualização');
+    }
 
   });//findWallet
 
@@ -696,7 +791,7 @@ const startCore = async () => {
   setTimeout(() => {scoreHolder()}, 5000);
 
   // Execute a função com determinado perido de tempo em ms
-  setInterval(startCore, 60 * 1000);
+  setInterval(startCore, 40 * 1000);
 }
 
 
