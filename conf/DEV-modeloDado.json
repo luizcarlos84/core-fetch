@@ -18,11 +18,11 @@
  /* collection - users */
 
 {
-  "_id"      : "ObjectId",
   "ver"      : 1,
   "username" : "string",
   "email"    : "string",
   "passwd"   : "hash",
+  "score"    : "number",
   "wallet"   : ["string"],
   "rate_avg" : "var",
   "rate"     : [{
@@ -68,16 +68,23 @@
   "_id"      : "address : string",
   "hash160"  : "string",
   "ver"      : 1,
+  "owner"    : "ObjectId",
+  "received" : "number",
+  "sent"     : "number",
+  "balance"  : "number",
   "confirmed": "boolean",
   "miner"    : "boolean",
-  "orphan"   : "boolean",
   "pool"     : "boolean",
-  "n_tx"     : "var",
+  "score"    : {
+    "score"     : "number",
+    "timestamp" : "number",
+    "exchange"  : [{"time": "number", "out": "number", "periodo": "number", "percent":"number"},
+                   {"time": "number", "in": "number", "periodo": "number", "percent": "number"}]},
   "txs"      : [{
-      "time"      : "date or var",
-      "hash"      : "string",
-      "input"     : [{"addr": "string", "value" : "string", "spent" : "boolean"}],
-      "out"       : [{"addr": "string", "value" : "string", "spent" : "boolean"}]
+      "time"   : "date or var",
+      "hash"   : "string",
+      "input"  : [{"addr": "string", "value" : "string", "spent" : "boolean"}],
+      "out"    : [{"addr": "string", "value" : "string", "spent" : "boolean"}]
     }]
 }
 
@@ -110,21 +117,8 @@
 /* collection - pending*/
 
    {
+     "_id"       : "ObjectId",
      "_idUser"   : "ObjectId",
      "wallet"    : "string",
+     "timestamp" : "number"
    }
-
-/* -------------------Modelo de manupulação de dados------------------- */
-
-/*  conf     : variáveis de configuração                                 */
-/*  data     : Objeto com os dados para manipulação                      */
-/*  fetch    : Retorno de Solicitações externas                          */
-/*  db       : Retorno de Informações armazenadas no banco               */
-/*  result   : Resultado de manipulação entre fetch e o db               */
-
-{
-  "conf"   : [],
-  "fetch"  : [],
-  "db"     : [],
-  "result" : []
-}

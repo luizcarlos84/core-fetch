@@ -34,7 +34,7 @@ walletPattern = (raw, owner) => {
       n_tx = raw.n_tx;
 
   // Instancia o objeto wallet
-  let wallet = conf.wallet(raddress, hash160, owner, rec, sent, bal, n_tx)
+  let wallet = conf.wallet(address, hash160, owner, rec, sent, bal, n_tx)
 
   for(p_txs in raw.txs){
     // Resume o valor adiquirido
@@ -157,7 +157,7 @@ var updateWallet = (wallet, update) => {
       coll1 = conf.db.coll[0], //coll - wallet
       query0 = {$or: [{_id: {$eq : wallet}}, {hash160: {$eq : wallet}}]};
 
-  db.findOneAndUpdate(db1, coll1, query0, update, {});
+  db.findOneAndUpdate(db1, coll1, query0, update, {upsert: true});
 }
 
 
@@ -343,8 +343,6 @@ blocksExplorer = () => {
 
 }
 */
-/* ---------------- Inicializando asincrona funções ---------------- */
-
 
 /* ---------------- Funções externas ---------------- */
 
@@ -366,22 +364,22 @@ var walletPending = () => {
   let checkPending = (err, doc) => {
 
     query0 = {$or: [{'_id': {$eq : doc.wallet}}, {'hash160': {$eq : doc.wallet}}]}
-    findWallet(doc.wallet, {}, (err, doc) => {
+    findWallet(doc.wallet, {}, (err, doc1) => {
 
       // Se a wallet existe
-      if(doc){
+      if(doc1){
 
         // Se houver proprietario
-        if (doc.owner){
+        if (doc1.owner){
 
           // Se o solicitante for o proprietario
-          if(doc._idUser.equals(doc.owner)) {
+          if(doc._idUser.equals(doc1.owner)) {
             // Verifica se possui dono
-            console.log('walletPending:'.blue, doc._id,'é de sua propriedade'.yellow);
+            console.log('walletPending:'.blue, doc1._id,'é de sua propriedade'.yellow);
           }
           else{
             // Verifica se possui dono
-            console.log('walletPending:'.blue, doc._id, 'possui outro proprietario'.yellow);
+            console.log('walletPending:'.blue, doc1._id, 'possui outro proprietario'.yellow);
 
             deleteWalletUser( doc._idUser, doc.wallet )
 
@@ -396,7 +394,7 @@ var walletPending = () => {
           console.log('walletPending:'.blue, 'Proprietário inserido');
 
           // Remove do Pending
-          deletePending( doc.wallet );
+          deletePending( doc._idUser, doc.wallet );
 
         }
       }
@@ -408,7 +406,7 @@ var walletPending = () => {
           db.insertOne(db0, coll0, query0);
 
           // Remove do Pending
-          deletePending( doc.wallet );
+          deletePending( doc._idUser, doc.wallet );
 
         })
         console.log('walletPending:'.blue, 'Carteira Inserida');
@@ -426,8 +424,12 @@ var walletPending = () => {
 
         /* O Objetivo é que cada valor na array tenha um espaço de tempo
         para a execução. Então cada elemento tera um espaço de 10 segundos*/
-        setTimeout(() => {checkPending(err, element)}, 10000 * index)
-
+        if(element)
+          // setTimeout(() => {checkPending(err, element)}, 10000 * index)
+          checkPending(err, element);
+        else {
+          console.log('walletPending:'.blue, 'Elemento vazio'.red);
+        }
       }); //doc.for each
     } //if(array.length > 0)
 
@@ -459,6 +461,13 @@ scoreHolder = () => {
 
 
   let orderScore = (err, doc) => {
+
+    if(doc.score.exchange){
+      updateWallet(doc._id,{$pullAll: {
+        "score.exchange": doc.score.exchange
+      }});
+    }
+
 
     // Organiza as transações dentro da array exchange
     doc.txs.forEach( element => {
@@ -611,6 +620,7 @@ scoreHolder = () => {
     percentScore( doc );
   }
 
+
   let percentScore = (doc) => {
 
     /* calcPercent = Realiza o um calculo entre cada periodo de debito e credito
@@ -673,6 +683,7 @@ scoreHolder = () => {
     saveScore(doc);
   }
 
+
   let saveScore = (doc) => {
     // Salva ou atualiza a reputação na carteira
 
@@ -696,6 +707,12 @@ scoreHolder = () => {
       }
     })
 
+    // updateWallet(doc._id,{
+    //   $pull: {
+    //     'score.exchange': { $gte: 0 }
+    //   }
+    // });
+
     updateWallet(doc._id,{
       $set: {
         'score.timestamp': Date.now(),
@@ -712,6 +729,7 @@ scoreHolder = () => {
 
     resultScore();
   }
+
 
   let resultScore = () => {
 
@@ -731,6 +749,7 @@ scoreHolder = () => {
       clearScore();
   } //resultScore
 
+
   let clearScore = () => {
 
     exchange.splice(0); //filtra e armazena as transações da busca em objetos,
@@ -749,7 +768,7 @@ scoreHolder = () => {
   let cronos = Date.now() - 90000;
   // Variaveis para o banco
 
-  let query = { 'score.timestamp' : {$lt : cronos }},
+  let query = {},
       options = { projection: {
         '_id'  : 1,
         'owner': 1,

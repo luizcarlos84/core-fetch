@@ -34,7 +34,18 @@ Evite usar o index.js deixando vestígios de código.
 // var d = '3PFBqQw6D61CXgbixxqTXuavaAvYz2iu3S' //novo
 // var e = '3MSCFLrkEhiEzigXcoaCVeJwouJtz9Ye6A' //novo
 // var f = '13ceZUnVNPMNfY9X7fiiceyXUKk4YfrTvH' //novo
-var x = ['a', 'b', 'c', 'd'];
+// var x = ['a', 'b', 'c', 'd'];
+//
+// var y = [{'a' : 1}, {'b' : 2}];
+// var z = [{'c' : 3}, {'d' : 4}];
+//
+// console.log(x);
+// x.splice(0);
+// console.log(x);
+//
+// y = y.concat(z);
+// console.log(y);
+
 // var y = [];
 // var senha = 'teste1'
 //
@@ -85,6 +96,6 @@ var x = ['a', 'b', 'c', 'd'];
 // round = 0;
 // recursiva();
 
-console.log(x);
-x.splice(0);
-console.log(x);
+coin.btc.rawaddr( '16xBnm5iwHGzgYevEo27imDZ6gScNN5t2g' ).then( res => {
+  console.log(res);
+})
