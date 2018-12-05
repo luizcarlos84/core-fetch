@@ -1,40 +1,68 @@
 'use strict';
 
+
+/*
+  Retorna os modelos de endereço e variaveis.
+*/
+
+
+
+
+/*
+  Função de retorno de URL
+*/
+const url = (value1, value2, value3) => {
+
+  // O endereço de acesso deve ser configurado aqui
+    let host = 'localhost',
+        port = 27017,
+        protocol = 'mongodb://',
+        hostname;
+
+    // Retorno
+    if(port && typeof(port) == 'number')
+      hostname = protocol + host + ':' + port + '/';
+    else
+      hostname = protocol + host + '/';
+
+
+    if(value3)
+      hostname += value1 + '/' + value2 + '/' + value3;
+    else if(value2)
+      hostname += value1 + '/' + value2;
+    else if(value1)
+      hostname += value1;
+
+
+    return hostname;
+}
+
+
+
+
 /* -------------------variaveis de configuração------------------- */
 
 // Database
 const db = {
 
   // Variaveis
-  host   : 'localhost',
-  port   : 27017,
   base   : ['wallet', 'users', 'session'],
   coll   : ['wallet', 'users', 'pending', 'owner'],
   adm    : ['config'],
 
-  /* gets*/
-
-  address     : function(port){
-    if( typeof(port) == 'number')
-      return 'mongodb://' + this.host + ':' + port + '/';
-    else
-      return 'mongodb://' + this.host + '/';
-  },
-
-
   /* Host das carteiras*/
   hostwallet  : function(){
-    return this.address(this.port) + this.base[0];
+    return url(this.base[0]);
   },
 
   /* host dos usuários */
   hostuser    : function(){
-    return this.address(this.port) + this.base[1];
+    return url(this.base[1]);
   },
 
   /* host de sessão */
   hostsession : function(){
-    return this.address(this.port) + this.base[2];
+    return url(this.base[2]);
   }
 };
 

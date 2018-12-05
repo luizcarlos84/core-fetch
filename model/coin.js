@@ -3,176 +3,237 @@
 // ---------------- Required ----------------
 // Required - exports by npm
 const rest = require('./rest');
+const https = require('https');
+
+// Retorno dos endereços
+const url = (value1, value2, value3) => {
+
+    // O endereço de acesso deve ser configurado aqui
+    let hostname = 'https://blockchain.info/';
+
+    if(value3)
+      hostname += value1 + '/' + value2 + '/' + value3;
+    else if(value2)
+      hostname += value1 + '/' + value2;
+    else if(value1)
+      hostname += value1;
+
+    return hostname;
+
+}
+
+
 
 // Url para acesso ao blockchain
 const btc = {
 
-  // Variaveis das funções
-  var_hostname   : 'https://blockchain.info/',
-  var_rawtx      : 'rawtx/',                  //Retorna JSON de uma transação simples
-  var_rawblock   : 'rawblock/',               //Retorna JSON das transações em um bloco
-  var_rawaddr    : 'rawaddr/',                //Retorna JSON das transações de uma carteira
-  var_multiaddr  : 'multiaddr?active=',       //Retornar JSON com multiplas transações
-  var_balance    : 'balance?active=',         //Retorno JSON com o saldo da carteira
-  var_latestblock: 'latestblock',             //Retorna ultimo bloco
-  var_query      : 'q/',                      //Parametros de consultas
-  var_blocks     : 'blocks' ,                 //Parametros de retorno dos blocos
-  var_json       : '?format=json',            //Solicitação em formato JSON
-
-  // Retorna o host dentro das funções
-  host: function(cmd){
-    return this.var_hostname + cmd;
-  },
-
   // Retorna JSON de uma transação simples
-  rawtx      : async function(var_hash){
-    return rest.req(this.host(this.var_rawtx) + var_hash);
+  tx              : (hash) => {
+    return rest.req(url('rawtx', hash));
   },
 
-  multiaddr  : async function(array_hash){
-    let address = '';
 
-      array_hash.forEach( async (element, index) => {
-        if(element != 0)
-          address =+ '|';
-        address =+ element;
+  // Retorno multiplas transações desordenada
+  multiaddress    : (array) => {
+    // Sequencia de muitas arrays
+    let wallets = 'multiaddr?active=';
+
+      array.forEach( async (element, index) => {
+        if(index > 0)
+          wallets =+ '|';
+        wallets =+ element;
       })
 
-    return await rest.req(this.host(this.var_multiaddr) + address);
+    return rest.req(url(wallets));
   },
+
 
   // Retorna JSON das transações em um bloco
-  rawblock   : async function(var_hash){
-    return rest.req(this.host(this.var_rawblock) + var_hash);
+  block           : (hash) => {
+    return rest.req(url('rawblock', hash));
   },
+
 
   // Retorna JSON das transações de uma carteira
-  rawaddr    : async function(var_wallet){
-    return rest.req(this.host(this.var_rawaddr) + var_wallet);
+  address         : (wallet) => {
+    return rest.req(url('rawaddr', wallet));
   },
 
+
   //Retorno JSON com o saldo da carteira
-  balance    : async function(var_wallet){
-    return rest.req(this.host(this.var_balance) + var_wallet);
+  balance         : (wallet) => {
+    wallet = 'balance?active=' + wallet;
+    return rest.req(url(wallet));
   },
+
+
+
 
   // ---------------- Real-Time ----------------
 
   // Retorno da lista de Blocos disponiveis e os seus hash
   // Foi necessário inserir um timeStamp 1535416365158 da data de 28/08/2018
-  getblocks: async function() {
-    return rest.req(this.host(this.var_blocks) + '/1535416365158' + this.var_json);
+  getblocks       : () => {
+    return rest.req(url( 'blocks', '1535416365158' + '?format=json'));
   },
+
 
   // Current difficulty target as a decimal number
   // Valor da dificuldade em decimal
-  getdifficulty: async function(){
-    return await rest.req(this.host(this.var_query) + 'getdifficulty');
+  getdifficulty   : () => {
+    return rest.req(url( 'q',  'getdifficulty'));
   },
+
 
   // Current block height in the longest chain
   // Retorna o valor do ultimo bloco
-  getblockcount: function(){
-    return this.host(this.var_query) + 'getblockcount';
+  getblockcount   : () => {
+    return url('q', 'getblockcount');
   },
+
 
   // Hash of the latest block
   // Hash do ultimo bloco
-  latesthash: function() {
-    return this.host(this.var_query) + 'latesthash';
+  latesthash      : () => {
+    return url('q', 'latesthash');
   },
 
+
   // Retorna o ultimo bloco sendo processado
-  latestblock: function(){
-    return this.host(this.var_latestblock);
+  latestblock     : () => {
+    return url('latestblock');
   },
+
 
   // Current block reward in BTC
   // Valor da recompensa do bloco em BTC
-  bcperblock: function(){
-    return this.host(this.var_query) + 'bcperblock';
+  bcperblock      : () => {
+    return url('q', 'bcperblock');
   },
+
 
   // Total Bitcoins in circulation (delayed by up to 1 hour])
   // Total de Bitcoins em circulação
-  totalbc: function(){
-    return this.host(this.var_query) + 'totalbc';
+  totalbc         : () => {
+    return url('q', 'totalbc');
   },
+
 
   // Probability of finding a valid block each hash attempt
   // Probabilidade de encontrar um bloco válido
-  probability: function() {
-    return this.host(this.var_query) + 'probability';
+  probability     : () => {
+    return url('q', 'probability');
   },
+
 
   // Average number of hash attempts needed to solve a block
   // Media do numero de tentativas de necessários para resolver um bloco
-  hashestowin: function() {
-    return this.host(this.var_query) + 'hashestowin';
+  hashestowin     : () => {
+    return url('q', 'hashestowin');
   },
+
 
   // Block height of the next difficulty retarget
   // Valor da dificuldade para a dificuldade do proximo bloco
-  nextretarget: function(){
-    return this.host(this.var_query) + 'nextretarget';
+  nextretarget    : () => {
+    return url('q', 'nextretarget');
   },
+
 
   // Average transaction size for the past 1000 blocks.
   // Change the number of blocks by passing an integer as the second argument
   // e.g. avgtxsize/2000
-  avgtxsize: function() {
-    return this.host(this.var_query) + 'avgtxsize';
+  avgtxsize       : () => {
+    return url('q', 'avgtxsize');
   },
+
 
   // Average transaction value (1000 Default)
-  avgtxvalue: function() {
-    return this.host(this.var_query) + 'avgtxvalue';
+  avgtxvalue      : () => {
+    return url('q', 'avgtxvalue');
   },
+
 
   // average time between blocks in seconds
-  interval: function(){
-    return this.host(this.var_query) + 'interval';
+  interval        : () => {
+    return url('q','interval');
   },
+
 
   // estimated time until the next block (in seconds)
-  eta: function() {
-    return this.host(this.var_query) + 'eta';
+  eta             : () => {
+    return url('q', 'eta');
   },
 
+
   //Average number of transactions per block (100 Default)
-  avgtxnumber: function() {
-    return this.host(this.var_query) + 'avgtxnumber';
+  avgtxnumber     : () => {
+    return url('q', 'avgtxnumber');
   },
+
 
   // ---------------- info transactions ----------------
 
   // txtotalbtcoutput/TxHash - Get total output value of a transaction (in satoshi)
-  txtotalbtcoutput: function(hash){
-    return this.host('txtotalbtcoutput/') + hash;
+  txtotalbtcoutput: (hash) => {
+    return url('txtotalbtcoutput', hash);
   },
+
 
   // txtotalbtcinput/TxHash - Get total input value of a transaction (in satoshi)
-  txtotalbtcinput: function(hash) {
-    return this.host('txtotalbtcinput/') + hash;
+  txtotalbtcinput: (hash) => {
+    return url('txtotalbtcinput', hash);
   },
 
+
   // txfee/TxHash - Get fee included in a transaction (in satoshi)
-  txfee: function(hash){
-    return this.host(this.var_query + 'txfee/') + hash;
+  txfee          : (hash) => {
+    return url('q', 'txfee', hash);
   },
+
 
   // txresult/TxHash/Address - Calculate the result of a transaction sent or
   // received to Address. Multiple addresses separated by |
-  txresult: function(hash, address) {
-    return this.host('txresult/') + hash + '/' + address;
+  txresult       : (hash, address) => {
+    return url('txresult', hash , address);
   },
+
+
+
+
 
   // ---------------- converter and returns ----------------
 
   // Converter o valor Hash para Address
-  // hashtoaddress: async function(hash) {
-  //   return await rest.req(this.host(this.var_query + 'hashtoaddress/') + hash + '?format=json');
-  // },
+  hashtoaddress  : (hash160, callback) => {
+    hash160 = hash160 + '?format=json';
+    hash160 = url('q', 'hashtoaddress', hash160);
+    let data = '';
+
+    https.get(hash160, res => {
+      console.log('statusCode:', res.statusCode);
+
+      res.on('data', value => {
+        data += value;
+      });
+
+      res.on('end', () => {
+
+        if(res.statusCode == 200) {
+          callback(data)
+        }
+        else if(res.statusCode == 500) {
+          callback(false)
+        }
+
+
+      })
+
+      res.on('error', err => {
+        console.error(err);
+      });
+    });
+  }
 
 };
 
